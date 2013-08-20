@@ -17,4 +17,5 @@ Displays past, present, and future bike network
 * <a href="http://leafletjs.com">Leaflet.js</a>
 * <a href="http://esri.github.io/esri-leaflet/">Esri-Leaflet Plugin</a>
 * <a href="http://jquery.com">jQuery</a> and <a href="http://jqueryui.com/">jQuery UI</a>
+* Creative Commons Icons from <a href="http://thenounproject.com/">The Noun Project</a>
 * <a href="http://pages.github.com/">GitHub Pages</a>
