@@ -8,9 +8,9 @@ Displays past, present, and future bike network
 
 ## Screenshots
 
-<img src="https://raw.github.com/mapmeld/bike-map/gh-pages/screenshot.png"/>
+<img src="https://raw.github.com/mapmeld/bike-plan/gh-pages/screenshot.png"/>
 
-<img src="https://raw.github.com/mapmeld/bike-map/gh-pages/screenshot2.png"/>
+<img src="https://raw.github.com/mapmeld/bike-plan/gh-pages/screenshot2.png"/>
 
 ## Technologies Used
 
