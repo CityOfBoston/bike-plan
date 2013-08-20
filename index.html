@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Boston Bicycle Plan</title>
+    <link rel="stylesheet" href="/leaflet.css" />
+    <!--[if lte IE 8]>
+      <link rel="stylesheet" href="/leaflet.ie.css" />
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/slider.css"/>
+    <link rel="stylesheet" type="text/css" href="/style.css"/>
+  </head>
+  <body>
+    <div id="map">
+      <div class="overlay-left">
+        <h3>Boston Bicycle Network</h3>
+        <h4>
+          <img id="bikesymbol" src="/regbike.png"/>
+          <span id="year">2013</span>
+        </h4>
+        <div id="yearslider">
+        </div>
+        <br/>
+        <button id="seeplanned" class="btn btn-primary">See Planned</button>
+      </div>
+      <div class="overlay-left lower">
+        <h4>Layers</h4>
+        <div id="imagery" class="layer">
+          <div class="layer-symbol">_</div>
+          <span class="layer-label">Ortho Photo</span>
+        </div>
+        <div id="mbta" class="layer">
+          <div class="layer-symbol">_</div>
+          <span class="layer-label">MBTA Stations</span>
+        </div>
+        <div id="hubway" class="layer">
+          <div class="layer-symbol">_</div>
+          <span class="layer-label">Hubway Stations</span>
+        </div>
+        <div class="layer">
+          <div class="layer-symbol">_</div>
+          <span class="layer-label">Neighborhood Centers</span>
+        </div>
+        <div class="layer">
+          <div class="layer-symbol">_</div>
+          <span class="layer-label">Projects Underway</span>
+        </div>
+        <div class="layer">
+          <div class="layer-symbol">_</div>
+          <span class="layer-label">Existing Facilities</span>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" src="/leaflet.js"></script>
+
+    <script type="text/javascript" src="/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="/jquery-ui.js"></script>
+    
+    <script type="text/javascript" src="/esri-leaflet.min.js"></script>
+    <script type="text/javascript" src="/bike-map.js"></script>
+    <!--
+    Icons CC-BY
+    Tricycle: CC0
+    Training Wheels: Ribbla Team, from The Noun Project
+    Bicycle: Public domain
+    Future bike: Simon Child, from The Noun Project
+    -->
+  </body>
+</html>
