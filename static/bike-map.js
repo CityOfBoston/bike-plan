@@ -54,7 +54,7 @@ var stylesByType = {"PS":{"color":"#44f","label":"Paved Shoulder"},"SUP":{"label
 /*
 var existingBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/1", {
   onEachFeature: function(geojson, layer){*/
-$.getJSON("/currentRoutes.geojson", function(data){
+$.getJSON("static/currentRoutes.geojson", function(data){
   for(var i=0;i<data.features.length;i++){
     var geojson = data.features[i];
     var layer = L.geoJson( geojson ).addTo(map);
@@ -105,7 +105,7 @@ $("#yearslider").slider({
 function updateMapTime(uptoyear){
   if(uptoyear >= maxyear){
     $("#year").text("Future");
-    $("#bikesymbol")[0].src = "/futurebike.png";
+    $("#bikesymbol")[0].src = "static/futurebike.png";
     if(!showFuture){
       showFuture = true;
       nextBikes.setStyle({ opacity: 0.8 });
@@ -119,7 +119,7 @@ function updateMapTime(uptoyear){
     $("#year").text(uptoyear);
     var phase = Math.floor( (uptoyear-minyear) / (currentyear-minyear) * phases.length );
     phase = Math.min( phases.length-1, phase );
-    $("#bikesymbol")[0].src = "/" + phases[phase] + ".png";
+    $("#bikesymbol")[0].src = "static/" + phases[phase] + ".png";
   }
   for(var year in pathsByYears){
     if(year <= uptoyear){
