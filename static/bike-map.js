@@ -91,7 +91,10 @@ $.getJSON("static/currentRoutes.geojson", function(data){
 
 // time slider on overlay
 L.DomEvent.disableClickPropagation( $(".overlay-left")[0] );
-var phases = ["tricycle", "trainingwheels", "regbike"];
+var phases = ["static/tricycle.png", "static/trainingwheels.png", "static/regbike.png"];
+preload(phases);
+preload(["static/futurebike.png"]);
+
 $("#yearslider").slider({
   min: minyear,
   value: currentyear,
@@ -119,7 +122,7 @@ function updateMapTime(uptoyear){
     $("#year").text(uptoyear);
     var phase = Math.floor( (uptoyear-minyear) / (currentyear-minyear) * phases.length );
     phase = Math.min( phases.length-1, phase );
-    $("#bikesymbol")[0].src = "static/" + phases[phase] + ".png";
+    $("#bikesymbol")[0].src = phases[phase];
   }
   for(var year in pathsByYears){
     if(year <= uptoyear){
@@ -296,4 +299,12 @@ function toggleMBTA(){
 
 function credits(){
   alert("Map by City of Boston; Training Wheels by Ribbla Team, from The Noun Project; Future Bike by Simon Child, from The Noun Project");
+}
+
+function preload(srcs){
+  var images = [ ];
+  for(var i=0; i<srcs.length; i++){
+    images[i] = new Image();
+    images[i].src = srcs[i];
+  }
 }
