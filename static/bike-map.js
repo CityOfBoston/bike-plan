@@ -62,7 +62,7 @@ $.getJSON("static/currentRoutes.geojson", function(data){
       if(typeof stylesByType[ geojson.properties.ExisFacil ] == "undefined"){
         stylesByType[ geojson.properties.ExisFacil ] = { color: null, label: "" };
       }
-      layer.setStyle({ color: stylesByType[ geojson.properties.ExisFacil ].color, opacity: 0.8 });
+      layer.setStyle({ color: stylesByType[ geojson.properties.ExisFacil ].color, opacity: 0.8, clickable: true });
       // add popup
       var content;
       if(typeof geojson.properties.STREET_NAM != "undefined" && geojson.properties.STREET_NAM && geojson.properties.STREET_NAM.length){
@@ -111,13 +111,13 @@ function updateMapTime(uptoyear){
     $("#bikesymbol")[0].src = "static/futurebike.png";
     if(!showFuture){
       showFuture = true;
-      nextBikes.setStyle({ opacity: 0.8 });
+      nextBikes.setStyle({ opacity: 0.8, clickable: true });
     }
   }
   else{
     if(showFuture){
       showFuture = false;
-      nextBikes.setStyle({ opacity: 0 });
+      nextBikes.setStyle({ opacity: 0, clickable: false });
     }
     $("#year").text(uptoyear);
     var phase = Math.floor( (uptoyear-minyear) / (currentyear-minyear) * phases.length );
@@ -174,7 +174,7 @@ var nextBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_ser
     if(typeof stylesByType[ geojson.properties.Rec1 ] == "undefined"){
       stylesByType[ geojson.properties.Rec1 ] = { color: null, label: "" };
     }
-    layer.setStyle({ color: stylesByType[ geojson.properties.Rec1 ].color, opacity: 0.8 });
+    layer.setStyle({ color: stylesByType[ geojson.properties.Rec1 ].color, opacity: 0.8, clickable: true });
     var content;
     if(typeof geojson.properties.STREET_NAM != "undefined" && geojson.properties.STREET_NAM && geojson.properties.STREET_NAM.length){
       content = "<h4>" + geojson.properties.STREET_NAM + "</h4>";
@@ -184,14 +184,14 @@ var nextBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_ser
       content = "<h4>" + stylesByType[ geojson.properties.Rec1 ].label + "</h4>";
     }
     layer.bindPopup(content);
-    showFuture || layer.setStyle({ opacity: 0 });
+    showFuture || layer.setStyle({ opacity: 0, clickable: false });
   }
 }).addTo(map);
 if(showFuture){
-  nextBikes.setStyle({ opacity: 0.8 });
+  nextBikes.setStyle({ opacity: 0.8, clickable: true });
 }
 else{
-  nextBikes.setStyle({ opacity: 0 });
+  nextBikes.setStyle({ opacity: 0, clickable: false });
 }
 $("#seeplanned").click(function(e){
   $("#yearslider").slider({ value: maxyear });
