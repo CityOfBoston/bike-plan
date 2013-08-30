@@ -13,6 +13,29 @@ map.addControl(L.control.zoom({ position: 'topright' }));
 
 var basemap = L.esri.basemapLayer("Topographic").addTo(map);
 
+var zoomedOut = false;
+map.on('zoomend', function(){
+  var zoom = map.getZoom();
+  if(zoom >= 13 && zoomedOut){
+    // zoom in style
+    zoomedOut = false;
+    for(var year in pathsByYears){
+      for(var i=0;i<pathsByYears[year].length;i++){
+        pathsByYears[year][i].setStyle({ weight: 5 });
+      }
+    }
+  }
+  else if(zoom < 13 && !zoomedOut){
+    // zoom out style
+    zoomedOut = true;
+    for(var year in pathsByYears){
+      for(var i=0;i<pathsByYears[year].length;i++){
+        pathsByYears[year][i].setStyle({ weight: 2 });
+      }
+    }
+  }
+});
+
 // add existing paths
 var pathsByYears = { };
 var minyear = 2008;
@@ -62,7 +85,7 @@ $.getJSON("static/currentRoutes.geojson", function(data){
       if(typeof stylesByType[ geojson.properties.ExisFacil ] == "undefined"){
         stylesByType[ geojson.properties.ExisFacil ] = { color: null, label: "" };
       }
-      layer.setStyle({ color: stylesByType[ geojson.properties.ExisFacil ].color, opacity: 0.8, clickable: true });
+      layer.setStyle({ color: stylesByType[ geojson.properties.ExisFacil ].color, opacity: 0.8 });
       // add popup
       var content;
       if(typeof geojson.properties.STREET_NAM != "undefined" && geojson.properties.STREET_NAM && geojson.properties.STREET_NAM.length){
@@ -111,13 +134,23 @@ function updateMapTime(uptoyear){
     $("#bikesymbol")[0].src = "static/futurebike.png";
     if(!showFuture){
       showFuture = true;
-      nextBikes.setStyle({ opacity: 0.8, clickable: true });
+      map.addLayer(nextBikes);
+      for(var year in pathsByYears){
+        for(var i=0;i<pathsByYears[year].length;i++){
+          pathsByYears[year][i].setStyle({ opacity: 0.35 });
+        }
+      }
     }
   }
   else{
     if(showFuture){
       showFuture = false;
-      nextBikes.setStyle({ opacity: 0, clickable: false });
+      map.removeLayer(nextBikes);
+      for(var year in pathsByYears){
+        for(var i=0;i<pathsByYears[year].length;i++){
+          pathsByYears[year][i].setStyle({ opacity: 0.8 });
+        }
+      }
     }
     $("#year").text(uptoyear);
     var phase = Math.floor( (uptoyear-minyear) / (currentyear-minyear) * phases.length );
@@ -174,7 +207,7 @@ var nextBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_ser
     if(typeof stylesByType[ geojson.properties.Rec1 ] == "undefined"){
       stylesByType[ geojson.properties.Rec1 ] = { color: null, label: "" };
     }
-    layer.setStyle({ color: stylesByType[ geojson.properties.Rec1 ].color, opacity: 0.8, clickable: true });
+    layer.setStyle({ color: stylesByType[ geojson.properties.Rec1 ].color, opacity: 0.8 });
     var content;
     if(typeof geojson.properties.STREET_NAM != "undefined" && geojson.properties.STREET_NAM && geojson.properties.STREET_NAM.length){
       content = "<h4>" + geojson.properties.STREET_NAM + "</h4>";
@@ -183,15 +216,14 @@ var nextBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_ser
     else{
       content = "<h4>" + stylesByType[ geojson.properties.Rec1 ].label + "</h4>";
     }
+    if(typeof geojson.properties.Rec2 != "undefined" && geojson.properties.Rec2 && geojson.properties.Rec2.length && typeof stylesByType[ geojson.properties.Rec2 ] != "undefined"){
+      content += "<p>Secondary recommendation: " + stylesByType[ geojson.properties.Rec2 ].label + "</p>";
+    }
     layer.bindPopup(content);
-    showFuture || layer.setStyle({ opacity: 0, clickable: false });
   }
 }).addTo(map);
-if(showFuture){
-  nextBikes.setStyle({ opacity: 0.8, clickable: true });
-}
-else{
-  nextBikes.setStyle({ opacity: 0, clickable: false });
+if(!showFuture){
+  map.removeLayer(nextBikes);
 }
 $("#seeplanned").click(function(e){
   $("#yearslider").slider({ value: maxyear });
