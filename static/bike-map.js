@@ -48,14 +48,18 @@ var stylesByRoad = { };
 L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/0", {
   onEachFeature: function(geojson, layer){
       // set color
-      if(typeof stylesByType[ geojson.properties.ExisFacil ] == "undefined" && typeof stylesByType[ geojson.properties.Rec1 ] == "undefined"){
-        stylesByType[ geojson.properties.ExisFacil ] = { color: "#000", label: "" };
+      try{
+        if(typeof stylesByType[ geojson.properties.ExisFacil ] == "undefined" && typeof stylesByType[ geojson.properties.Rec1 ] == "undefined"){
+          stylesByType[ geojson.properties.ExisFacil ] = { color: "#000", label: "" };
+        }
+        if(typeof stylesByType[ geojson.properties.ExisFacil ] == "undefined"){
+          layer.setStyle({ color: stylesByType[ geojson.properties.Rec1 ].color, opacity: 0.8 });      
+        }
+        else{
+          layer.setStyle({ color: stylesByType[ geojson.properties.ExisFacil ].color, opacity: 0.8 });
+        }
       }
-      if(typeof stylesByType[ geojson.properties.ExisFacil ] == "undefined"){
-        layer.setStyle({ color: stylesByType[ geojson.properties.Rec1 ].color, opacity: 0.8 });      
-      }
-      else{
-        layer.setStyle({ color: stylesByType[ geojson.properties.ExisFacil ].color, opacity: 0.8 });
+      catch(e){
       }
       // add popup
       var content;
