@@ -65,10 +65,20 @@ L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_netwo
       var content;
       if(typeof geojson.properties.STREET_NAM != "undefined" && geojson.properties.STREET_NAM && geojson.properties.STREET_NAM.length){
         content = "<h4>" + geojson.properties.STREET_NAM + "</h4>";
-        content += "<p>" + stylesByType[ geojson.properties.ExisFacil ].label + "</p>";
+        if(typeof stylesByType[ geojson.properties.ExisFacil ] == "undefined"){
+          content += "<p>" + stylesByType[ geojson.properties.Rec1 ].label + "</p>";
+        }
+        else{
+          content += "<p>" + stylesByType[ geojson.properties.ExisFacil ].label + "</p>";
+        }
       }
       else{
-        content = "<h4>" + stylesByType[ geojson.properties.ExisFacil ].label + "</h4>";
+        if(typeof stylesByType[ geojson.properties.ExisFacil ] == "undefined"){
+          content += "<h4>" + stylesByType[ geojson.properties.Rec1 ].label + "</h4>";
+        }
+        else{
+          content += "<h4>" + stylesByType[ geojson.properties.ExisFacil ].label + "</h4>";
+        }
       }
       if(geojson.properties.InstallDate * 1){
         content += "<p>Installed " + geojson.properties.InstallDate + "</p>";
