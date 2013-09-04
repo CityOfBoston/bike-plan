@@ -118,7 +118,7 @@ function updateMapTime(uptoyear){
       map.removeLayer(fiveBikes);
     }
     if(!showThirty){
-      showFive = true;
+      showThirty = true;
       map.addLayer(thirtyBikes);
       for(var year in pathsByYears){
         for(var i=0;i<pathsByYears[year].length;i++){
