@@ -50,6 +50,7 @@ L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_netwo
       // set color
       try{
         if(typeof stylesByType[ geojson.properties.ExisFacil ] == "undefined" && typeof stylesByType[ geojson.properties.Rec1 ] == "undefined"){
+          console.log(geojson.properties);
           stylesByType[ geojson.properties.ExisFacil ] = { color: "#000", label: "" };
         }
         if(typeof stylesByType[ geojson.properties.ExisFacil ] == "undefined"){
