@@ -40,50 +40,16 @@ map.on('zoomend', function(){
 var pathsByYears = { };
 var minyear = 2008;
 var currentyear = 2013;
-var maxyear = currentyear + 1; // represents future
-
-/*var stylesByType = {
-  PS: {
-    color: "#44f",
-    label: "Paved Shoulder"
-  }
-};
-var s = document.createElement('script');
-s.type = "text/javascript";
-s.src = "http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/1?f=pjson&callback=setStyles";
-document.body.appendChild(s);
-function processColor(esriColor){
-  if(esriColor.length > 3){
-    esriColor = esriColor.slice(0,3).join(",");
-  }
-  // replace unfit colors
-  if(esriColor == "93,107,50"){
-    esriColor = "107,207,50";
-  }
-  return "rgb(" + esriColor + ")";
-}
-function setStyles(styleinfo){
-  styleinfo = styleinfo.drawingInfo.renderer.uniqueValueInfos;
-  for(var d=0;d<styleinfo.length;d++){
-    stylesByType[ styleinfo[d].value ] = {
-      label: styleinfo[d].label,
-      color: processColor( styleinfo[d].symbol.color )
-    };
-  }*/
+var maxyear = currentyear + 2; // represents +5year and +30year plans
 
 var stylesByType = {"PS":{"color":"#44f","label":"Paved Shoulder"},"SUP":{"label":"Shared-Use Path","color":"rgb(107,207,50)"},"CT1-1":{"label":"Cycle Track","color":"rgb(173,32,142)"},"CT1-2":{"label":"Cycle Track","color":"rgb(173,32,142)"},"CT2-1":{"label":"Cycle Track","color":"rgb(173,32,142)"},"BFBL":{"label":"Buffered Bike Lane","color":"rgb(31,120,180)"},"BL":{"label":"Bike Lane","color":"rgb(31,120,180)"},"CL":{"label":"Bike Lane","color":"rgb(31,120,180)"},"SRd":{"label":"Shared Road","color":"rgb(91,176,70)"},"BSBL":{"label":"Bus-Bike Lane","color":"rgb(166,206,227)"},"SLM":{"label":"Shared-Lane Marking","color":"rgb(166,206,227)"}};
+var stylesByRoad = { };
 
-
-/*
-var existingBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/1", {
-  onEachFeature: function(geojson, layer){*/
-$.getJSON("static/currentRoutes.geojson", function(data){
-  for(var i=0;i<data.features.length;i++){
-    var geojson = data.features[i];
-    var layer = L.geoJson( geojson ).addTo(map);
+L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/0", {
+  onEachFeature: function(geojson, layer){
       // set color
       if(typeof stylesByType[ geojson.properties.ExisFacil ] == "undefined"){
-        stylesByType[ geojson.properties.ExisFacil ] = { color: null, label: "" };
+        stylesByType[ geojson.properties.ExisFacil ] = { color: "#000", label: "" };
       }
       layer.setStyle({ color: stylesByType[ geojson.properties.ExisFacil ].color, opacity: 0.8 });
       // add popup
@@ -107,10 +73,8 @@ $.getJSON("static/currentRoutes.geojson", function(data){
       else{
         pathsByYears[adddate].push( layer );
       }
-    }
-});
-//}).addTo(map);
-//}
+  }
+}).addTo(map);
 
 // time slider on overlay
 L.DomEvent.disableClickPropagation( $(".overlay-left")[0] );
@@ -129,12 +93,33 @@ $("#yearslider").slider({
   }
 });
 function updateMapTime(uptoyear){
-  if(uptoyear >= maxyear){
-    $("#year").text("Future");
+  if(uptoyear == maxyear-1){
+    $("#year").text("+5 years");
     $("#bikesymbol")[0].src = "static/futurebike.png";
-    if(!showFuture){
-      showFuture = true;
-      map.addLayer(nextBikes);
+    if(showThirty){
+      showThirty = false;
+      map.removeLayer(thirtyBikes);
+    }
+    if(!showFive){
+      showFive = true;
+      map.addLayer(fiveBikes);
+      for(var year in pathsByYears){
+        for(var i=0;i<pathsByYears[year].length;i++){
+          pathsByYears[year][i].setStyle({ opacity: 0.35 });
+        }
+      }
+    }
+  }
+  else if(uptoyear == maxyear){
+    $("#year").text("+30 years");
+    $("#bikesymbol")[0].src = "static/tandem.png";
+    if(showFive){
+      showFive = false;
+      map.removeLayer(fiveBikes);
+    }
+    if(!showThirty){
+      showFive = true;
+      map.addLayer(thirtyBikes);
       for(var year in pathsByYears){
         for(var i=0;i<pathsByYears[year].length;i++){
           pathsByYears[year][i].setStyle({ opacity: 0.35 });
@@ -143,9 +128,11 @@ function updateMapTime(uptoyear){
     }
   }
   else{
-    if(showFuture){
-      showFuture = false;
-      map.removeLayer(nextBikes);
+    if(showFive || showThirty){
+      showFive = false;
+      showThirty = false;
+      map.removeLayer(fiveBikes);
+      map.removeLayer(thirtyBikes);
       for(var year in pathsByYears){
         for(var i=0;i<pathsByYears[year].length;i++){
           pathsByYears[year][i].setStyle({ opacity: 0.8 });
@@ -200,8 +187,51 @@ $(".layer").click(function(e){
 });
 
 // future bike layer
-var showFuture = false;
-var nextBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/0", {
+var showFive = false;
+var showThirty = false;
+var fiveBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/1", {
+  onEachFeature: function(geojson, layer){
+    //console.log(geojson.properties);
+    if(typeof stylesByType[ geojson.properties.Rec1 ] == "undefined"){
+      stylesByType[ geojson.properties.Rec1 ] = { color: null, label: "" };
+    }
+    layer.setStyle({ color: stylesByType[ geojson.properties.Rec1 ].color, opacity: 0.8 });
+    var content;
+    if(typeof geojson.properties.STREET_NAM != "undefined" && geojson.properties.STREET_NAM && geojson.properties.STREET_NAM.length){
+      content = "<h4>" + geojson.properties.STREET_NAM + "</h4>";
+      content += "<p>" + stylesByType[ geojson.properties.Rec1 ].label + "</p>";
+    }
+    else{
+      content = "<h4>" + stylesByType[ geojson.properties.Rec1 ].label + "</h4>";
+    }
+    if(typeof geojson.properties.Rec2 != "undefined" && geojson.properties.Rec2 && geojson.properties.Rec2.length && typeof stylesByType[ geojson.properties.Rec2 ] != "undefined"){
+      content += "<p>Secondary recommendation: " + stylesByType[ geojson.properties.Rec2 ].label + "</p>";
+    }
+    if(typeof geojson.properties.JURISDICTI != "undefined" && geojson.properties.JURISDICTI && geojson.properties.JURISDICTI.length){
+      content += "<p>In jurisdiction of " + geojson.properties.JURISDICTI + "</p>";
+    }
+    if(typeof geojson.properties.KeyBus != "undefined" && geojson.properties.KeyBus && geojson.properties.KeyBus.length){
+      content += "<p>Along bus route " + geojson.properties.KeyBus + "</p>";
+    }
+    if(typeof geojson.properties.Parking != "undefined" && geojson.properties.Parking && geojson.properties.Parking.length){
+      content += "<p>Parking: " + geojson.properties.Parking + "</p>";
+    }
+    if(typeof geojson.properties.TravelLanes != "undefined" && geojson.properties.TravelLanes && geojson.properties.TravelLanes.length){
+      content += "<p>Travel Lanes: " + geojson.properties.TravelLanes + "</p>";
+    }
+    layer.bindPopup(content);
+  }
+}).addTo(map);
+if(!showFive){
+  map.removeLayer(fiveBikes);
+}
+
+$("#seeplanned5").click(function(e){
+  $("#yearslider").slider({ value: maxyear-1 });
+  updateMapTime( maxyear-1 );
+});
+
+var thirtyBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/2", {
   onEachFeature: function(geojson, layer){
     //console.log(geojson.properties);
     if(typeof stylesByType[ geojson.properties.Rec1 ] == "undefined"){
@@ -222,10 +252,11 @@ var nextBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_ser
     layer.bindPopup(content);
   }
 }).addTo(map);
-if(!showFuture){
-  map.removeLayer(nextBikes);
+if(!showThirty){
+  map.removeLayer(thirtyBikes);
 }
-$("#seeplanned").click(function(e){
+
+$("#seeplanned30").click(function(e){
   $("#yearslider").slider({ value: maxyear });
   updateMapTime( maxyear );
 });
@@ -330,7 +361,7 @@ function toggleMBTA(){
 }
 
 function credits(){
-  alert("Map by City of Boston; Training Wheels by Ribbla Team, from The Noun Project; Future Bike by Simon Child, from The Noun Project");
+  alert("Map by City of Boston; Training Wheels by Ribbla Team, from The Noun Project; Future Bike by Simon Child, from The Noun Project; Tandem Bike by James Evans, from the Noun Project");
 }
 
 function preload(srcs){
