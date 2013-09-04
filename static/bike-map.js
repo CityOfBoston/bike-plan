@@ -48,6 +48,7 @@ var stylesByRoad = { };
 L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/0", {
   onEachFeature: function(geojson, layer){
       // set color
+      /*
       try{
         if(typeof stylesByType[ geojson.properties.ExisFacil ] == "undefined" && typeof stylesByType[ geojson.properties.Rec1 ] == "undefined"){
           console.log(geojson.properties);
@@ -61,6 +62,13 @@ L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_netwo
         }
       }
       catch(e){
+      }
+      */
+      if(geojson.properties.Spine){
+        layer.setStyle({ color: "#44f", opacity: 0.8 });
+      }
+      else{
+        layer.setStyle({ color: "orange", opacity: 0.8 });
       }
       // add popup
       var content;
