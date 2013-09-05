@@ -58,47 +58,67 @@ var stylesByType = {"PS":{"color":"#44f","label":"Paved Shoulder"},
 "ADV":{"label":"Advisory Lane","color":"rgb(166,206,227)"},
 "CTReplace":{"label":"Cycle Track","color":"rgb(166,206,227)"},
 "SLM":{"label":"Shared-Lane Marking","color":"rgb(166,206,227)"}};
+
 var jurisdictions = {
-  "0": "Unaccepted by city or town",
-  "1": "Massachusetts Highway Department",
+  "0": "Jurisdiction: Unaccepted by city or town",
+  "1": "Jurisdiction of Massachusetts Highway Department",
   "2": "City or Town accepted road",
-  "3": "Department of Conservation and Recreation",
-  "4": "Massachusetts Turnpike Authority",
-  "5": "Massachusetts Port Authority",
-  "B": "State College or University",
-  "H": "Private",
-  "M": "MBTA"
+  "3": "Jurisdiction of Department of Conservation and Recreation",
+  "4": "Jurisdiction of Massachusetts Turnpike Authority",
+  "5": "Jurisdiction of Massachusetts Port Authority",
+  "B": "Jurisdiction of State College or University",
+  "H": "Jurisdiction: Private",
+  "M": "Jurisdiction of MBTA"
 };
 
-L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/0", {
+var currentBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/0", {
+  style: function(geojson){
+    return styleLayer(geojson, "current");
+  },
   onEachFeature: function(geojson, layer){
-    styleLayer(geojson, layer, true);
     layer.bindPopup(describeLayer(geojson, layer, true));
     // add to timeline
     var adddate = geojson.properties.InstallDate || 0;
+    var path = {
+      layer: layer,
+      five: (geojson.properties.FiveYearPlan || ""),
+      existing: (geojson.properties.ExisFacil || ""),
+      rec1: (geojson.properties.Rec1 || "")
+    };
     if(typeof pathsByYears[adddate] == "undefined"){
-      pathsByYears[adddate] = [ { layer: layer, id: geojson.properties.OBJECTID } ];
+      pathsByYears[adddate] = [ path ];
     }
     else{
-      pathsByYears[adddate].push( { layer: layer, id: geojson.properties.OBJECTID } );
+      pathsByYears[adddate].push( path );
     }
   }
 }).addTo(map);
 
-function styleLayer(geojson, layer, isBuilt){
-  isBuilt = false;
+function styleLayer(geojson, buildDate){
+
+  var opacity = 0.8;
+  
+  /*
   if(isBuilt){
     if(geojson.properties.Spine){
-      layer.setStyle({ color: "orange", opacity: 0.8 });
+      layer.setStyle({ color: "orange", opacity: opacity });
     }
     else{
-      layer.setStyle({ color: "#44f", opacity: 0.8 });
+      layer.setStyle({ color: "#44f", opacity: opacity });
     }
   }
-  else{
-    var identity = geojson.properties.ExisFacil || geojson.properties.Rec1 || geojson.properties.Rec2;
-    layer.setStyle({ color: stylesByType[ identity ].color, opacity: 0.8 });
+  */
+  
+  /*
+  if(buildDate == "five" && geojson.properties.FiveYearPlan === null){
+    opacity = 0.35;
   }
+  else if(buildDate == "thirty" && (geojson.properties.FiveYearPlan || (geojson.properties.InstallDate || !geojson.properties.ExisFacil) && geojson.properties.Rec1)){
+    opacity = 0.35;
+  }
+  */
+  var identity = geojson.properties.ExisFacil || geojson.properties.Rec1 || geojson.properties.Rec2;
+  return { color: stylesByType[ identity ].color, opacity: opacity };
 }
 function describeLayer(geojson, layer, isBuilt){
   var content = "";
@@ -117,7 +137,7 @@ function describeLayer(geojson, layer, isBuilt){
     content += "<p>Secondary recommendation: " + stylesByType[ geojson.properties.Rec2 ].label + "</p>";
   }
   if(typeof geojson.properties.JURISDICTI != "undefined" && geojson.properties.JURISDICTI !== null && geojson.properties.JURISDICTI.length){
-    content += "<p>In jurisdiction of " + jurisdictions[ geojson.properties.JURISDICTI ] + "</p>";
+    content += "<p>" + jurisdictions[ geojson.properties.JURISDICTI ] + "</p>";
   }
   if(typeof geojson.properties.KeyBus != "undefined" && geojson.properties.KeyBus && geojson.properties.KeyBus.length){
     content += "<p>Along bus route " + geojson.properties.KeyBus + "</p>";
@@ -158,24 +178,7 @@ function updateMapTime(uptoyear){
     if(!showFive){
       showFive = true;
       map.addLayer(fiveBikes);
-      var builtIDs = [ ];
-      for(var year in pathsByYears){
-        if(year == maxyear - 1){
-          break;
-        }
-        for(var i=0;i<pathsByYears[year].length;i++){
-          map.removeLayer( pathsByYears[year][i].layer );
-          builtIDs.push( pathsByYears[year][i].id );
-        }
-      }
-      if(!hidLTfive){
-        hidLTfive = true;
-        for(var i=0;i<pathsByYears[maxyear-1].length;i++){
-          if( builtIDs.indexOf( pathsByYears[maxyear-1][i].id ) > -1 ){
-            pathsByYears[maxyear-1][i].layer.setStyle({ opacity: 0.2 });
-          }
-        }
-      }
+      map.removeLayer(currentBikes);
     }
   }
   else if(uptoyear == maxyear){
@@ -188,24 +191,7 @@ function updateMapTime(uptoyear){
     if(!showThirty){
       showThirty = true;
       map.addLayer(thirtyBikes);
-      var builtIDs = [ ];
-      for(var year in pathsByYears){
-        if(year == maxyear){
-          break;
-        }
-        for(var i=0;i<pathsByYears[year].length;i++){
-          map.removeLayer( pathsByYears[year][i].layer );
-          builtIDs.push( pathsByYears[year][i].id );
-        }
-      }
-      if(!hidLTthirty){
-        hidLTthirty = true;
-        for(var i=0;i<pathsByYears[maxyear].length;i++){
-          if( builtIDs.indexOf( pathsByYears[maxyear][i].id ) > -1 ){
-            pathsByYears[maxyear][i].layer.setStyle({ opacity: 0.2 });
-          }
-        }
-      }
+      map.removeLayer(currentBikes);
     }
   }
   else{
@@ -214,11 +200,7 @@ function updateMapTime(uptoyear){
       showThirty = false;
       map.removeLayer(fiveBikes);
       map.removeLayer(thirtyBikes);
-      for(var year in pathsByYears){
-        for(var i=0;i<pathsByYears[year].length;i++){
-          map.addLayer( pathsByYears[year][i].layer );
-        }
-      }
+      map.addLayer(currentBikes);
     }
     $("#year").text(uptoyear);
     var phase = Math.floor( (uptoyear-minyear) / (currentyear-minyear) * phases.length );
@@ -267,22 +249,26 @@ $(".layer").click(function(e){
   }
 });
 
-// future bike layer
+// future bike layers
 var showFive = false;
-var hidLTfive = false;
-var showThirty = false;
-var hidLTthirty = false;
 
 var fiveBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/1", {
+  style: function(geojson){
+    return styleLayer(geojson, "five");
+  },
   onEachFeature: function(geojson, layer){
-    //console.log(geojson.properties);
+    var path = {
+      layer: layer,
+      five: (geojson.properties.FiveYearPlan || ""),
+      existing: (geojson.properties.ExisFacil || ""),
+      rec1: (geojson.properties.Rec1 || "")
+    };
     if(typeof pathsByYears[ maxyear-1 ] == "undefined" ){
-      pathsByYears[ maxyear-1 ] = [ { layer: layer, id: geojson.properties.OBJECTID } ];
+      pathsByYears[ maxyear-1 ] = [ path ];
     }
     else{
-      pathsByYears[ maxyear-1 ].push( { layer: layer, id: geojson.properties.OBJECTID } );
+      pathsByYears[ maxyear-1 ].push( path );
     }
-    styleLayer(geojson, layer);
     layer.bindPopup( describeLayer(geojson, layer) );
   }
 }).addTo(map);
@@ -295,15 +281,25 @@ $("#seeplanned5").click(function(e){
   updateMapTime( maxyear-1 );
 });
 
+var showThirty = false;
+
 var thirtyBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/2", {
+  style: function(geojson){
+    return styleLayer(geojson, "thirty");
+  },
   onEachFeature: function(geojson, layer){
+    var path = {
+      layer: layer,
+      five: (geojson.properties.FiveYearPlan || ""),
+      existing: (geojson.properties.ExisFacil || ""),
+      rec1: (geojson.properties.Rec1 || "")
+    };
     if(typeof pathsByYears[ maxyear ] == "undefined" ){
-      pathsByYears[ maxyear ] = [ { layer: layer, id: geojson.properties.OBJECTID } ];
+      pathsByYears[ maxyear ] = [ path ];
     }
     else{
-      pathsByYears[ maxyear ].push( { layer: layer, id: geojson.properties.OBJECTID } );
+      pathsByYears[ maxyear ].push( path );
     }
-    styleLayer(geojson, layer);
     layer.bindPopup(describeLayer(geojson, layer));
   }
 }).addTo(map);
@@ -386,7 +382,7 @@ function loadMBTALines(data){
       }
     };
     mbta.addLayer(L.geoJson(gj, {
-      style: function(feature){
+      style: function(geojson){
         return { color: mbtaColors[ feature.properties.LINE ] };
       }
     }));
