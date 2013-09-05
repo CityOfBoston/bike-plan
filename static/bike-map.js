@@ -38,7 +38,7 @@ map.on('zoomend', function(){
 
 // add existing paths
 var pathsByYears = { };
-var minyear = 2008;
+var minyear = 2007;
 var currentyear = 2013;
 var maxyear = currentyear + 2; // represents +5year and +30year plans
 
