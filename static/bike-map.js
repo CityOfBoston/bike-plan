@@ -62,7 +62,7 @@ var stylesByType = {"PS":{"color":"#44f","label":"Paved Shoulder"},
 var jurisdictions = {
   "0": "Jurisdiction: Unaccepted by city or town",
   "1": "Jurisdiction of Massachusetts Highway Department",
-  "2": "City or Town accepted road",
+  "2": "Jurisdiction of the City of Boston",
   "3": "Jurisdiction of Department of Conservation and Recreation",
   "4": "Jurisdiction of Massachusetts Turnpike Authority",
   "5": "Jurisdiction of Massachusetts Port Authority",
@@ -133,19 +133,29 @@ function describeLayer(geojson, layer, isBuilt){
   if(isBuilt && geojson.properties.InstallDate * 1){
     content += "<p>Installed " + geojson.properties.InstallDate + "</p>";
   }
+  if(typeof geojson.properties.Spine != "undefined"){
+    if(geojson.properties.Spine){
+      content += "<p>Primary Road</p>";
+    }
+    else{
+      content += "<p>Secondary Road</p>";
+    }
+  }
+  /*
   if(!isBuilt && typeof geojson.properties.Rec2 != "undefined" && geojson.properties.Rec2 && geojson.properties.Rec2.length && typeof stylesByType[ geojson.properties.Rec2 ] != "undefined"){
     content += "<p>Secondary recommendation: " + stylesByType[ geojson.properties.Rec2 ].label + "</p>";
   }
+  */
   if(typeof geojson.properties.JURISDICTI != "undefined" && geojson.properties.JURISDICTI !== null && geojson.properties.JURISDICTI.length){
     content += "<p>" + jurisdictions[ geojson.properties.JURISDICTI ] + "</p>";
   }
-  if(typeof geojson.properties.KeyBus != "undefined" && geojson.properties.KeyBus && geojson.properties.KeyBus.length){
-    content += "<p>Along bus route " + geojson.properties.KeyBus + "</p>";
+  if(typeof geojson.properties.KeyBus != "undefined" && geojson.properties.KeyBus){
+    content += "<p>Along key MBTA bus route</p>";
   }
   if(typeof geojson.properties.Parking != "undefined" && geojson.properties.Parking && geojson.properties.Parking.length){
     content += "<p>Parking: " + geojson.properties.Parking + "</p>";
   }
-  if(typeof geojson.properties.TravelLanes != "undefined" && geojson.properties.TravelLanes && geojson.properties.TravelLanes.length){
+  if(typeof geojson.properties.TravelLanes != "undefined" && geojson.properties.TravelLanes){
     content += "<p>Travel Lanes: " + geojson.properties.TravelLanes + "</p>";
   }
   return content;
