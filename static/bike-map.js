@@ -165,7 +165,8 @@ function describeLayer(geojson, layer, isBuilt){
 L.DomEvent.disableClickPropagation( $(".overlay-left")[0] );
 var phases = ["static/tricycle.png", "static/trainingwheels.png", "static/regbike.png"];
 preload(phases);
-preload(["static/futurebike.png"]);
+preload(["static/CargoBike.png"]);
+preload(["static/Trail-a-Bike.png"]);
 
 $("#yearslider").slider({
   min: minyear,
@@ -180,7 +181,8 @@ $("#yearslider").slider({
 function updateMapTime(uptoyear){
   if(uptoyear == maxyear-1){
     $("#year").text("+5 years");
-    $("#bikesymbol")[0].src = "static/futurebike.png";
+    $("#bikesymbol")[0].src = "static/Trail-a-Bike.png";
+    $("#bikesymbol").addClass("future");
     if(showThirty){
       showThirty = false;
       map.removeLayer(thirtyBikes);
@@ -193,7 +195,8 @@ function updateMapTime(uptoyear){
   }
   else if(uptoyear == maxyear){
     $("#year").text("+30 years");
-    $("#bikesymbol")[0].src = "static/tandem.png";
+    $("#bikesymbol").addClass("future");
+    $("#bikesymbol")[0].src = "static/CargoBike.png";
     if(showFive){
       showFive = false;
       map.removeLayer(fiveBikes);
@@ -216,6 +219,7 @@ function updateMapTime(uptoyear){
     var phase = Math.floor( (uptoyear-minyear) / (currentyear-minyear) * phases.length );
     phase = Math.min( phases.length-1, phase );
     $("#bikesymbol")[0].src = phases[phase];
+    $("#bikesymbol").removeClass("future");
   }
   for(var year in pathsByYears){
     if(year <= uptoyear){

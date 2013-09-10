@@ -24,6 +24,10 @@ html, body, #map{
   vertical-align: middle;
   margin-right: 5px;
 }
+#bikesymbol.future{
+  width: 90px;
+  margin-left: -10px;
+}
 #year{
   vertical-align: middle;
 }
