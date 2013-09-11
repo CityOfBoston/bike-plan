@@ -71,7 +71,7 @@ var jurisdictions = {
   "M": "Jurisdiction of MBTA"
 };
 
-var currentBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/0", {
+var currentBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/services/BaseServices/Bike_network/FeatureServer/0", {
   style: function(geojson){
     return styleLayer(geojson, "current");
   },
@@ -273,7 +273,7 @@ $(".layer").click(function(e){
 // future bike layers
 var showFive = false;
 
-var fiveBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/1", {
+var fiveBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/services/BaseServices/Bike_network/FeatureServer/1", {
   style: function(geojson){
     return styleLayer(geojson, "five");
   },
@@ -308,7 +308,7 @@ $("#seeplanned5").click(function(e){
 
 var showThirty = false;
 
-var thirtyBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/2", {
+var thirtyBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/services/BaseServices/Bike_network/FeatureServer/2", {
   style: function(geojson){
     return styleLayer(geojson, "thirty");
   },
