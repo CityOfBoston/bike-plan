@@ -44,19 +44,19 @@ var maxyear = currentyear + 2; // represents +5year and +30year plans
 
 var stylesByType = {"PS":{"color":"#44f","label":"Paved Shoulder"},
 "SUP":{"label":"Shared-Use Path","color":"rgb(107,207,50)"},
-"CT1-1":{"label":"Cycle Track","color":"rgb(173,32,142)"},
-"CT1-2":{"label":"Cycle Track","color":"rgb(173,32,142)"},
-"CT2-1":{"label":"Cycle Track","color":"rgb(173,32,142)"},
-"BFBL":{"label":"Buffered Bike Lane","color":"rgb(31,120,180)"},
-"BL":{"label":"Bike Lane","color":"rgb(31,120,180)"},
-"CL":{"label":"Bike Lane","color":"rgb(31,120,180)"},
-"SRd":{"label":"Shared Road","color":"rgb(91,176,70)"},
+"CT1-1":{"label":"Cycle Track","color":"rgb(172,35,141)"},
+"CT1-2":{"label":"Cycle Track","color":"rgb(172,35,141)"},
+"CT2-1":{"label":"Cycle Track","color":"rgb(172,35,141)"},
+"BFBL":{"label":"Buffered Bike Lane","color":"rgb(78,166,47)"},
+"BL":{"label":"Bike Lane","color":"rgb(78,166,47)"},
+"CL":{"label":"Bike Lane","color":"rgb(78,166,47)"},
+  "SRd":{"label":"Shared Road","color":"rgb(78,166,47)"},
 "BSBL":{"label":"Bus-Bike Lane","color":"rgb(166,206,227)"},
-"NW":{"label":"Neighborway","color":"rgb(166,206,227)"},
-"CFBL":{"label":"Contraflow Bike Lane","color":"rgb(166,206,227)"},
-"PSL":{"label":"Priority Shared Lane Markings","color":"rgb(166,206,227)"},
+  "NW":{"label":"Neighborway","color":"rgb(78,166,47)"},
+"CFBL":{"label":"Contraflow Bike Lane","color":"rgb(78,166,47)"},
+"PSL":{"label":"Priority Shared Lane Markings","color":"rgb(166,206,227"},
 "ADV":{"label":"Advisory Lane","color":"rgb(166,206,227)"},
-"CTReplace":{"label":"Cycle Track","color":"rgb(166,206,227)"},
+"CTReplace":{"label":"Cycle Track","color":"rgb(0,0,0)"},
 "SLM":{"label":"Shared-Lane Marking","color":"rgb(166,206,227)"}};
 
 var jurisdictions = {
@@ -76,6 +76,10 @@ var currentBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_
     return styleLayer(geojson, "current");
   },
   onEachFeature: function(geojson, layer){
+    var identity = geojson.properties.ExisFacil || geojson.properties.Rec1 || geojson.properties.Rec2;
+    if(identity == "CTReplace"){
+      return;
+    }
     layer.bindPopup(describeLayer(geojson, layer, true));
     // add to timeline
     var adddate = geojson.properties.InstallDate || 0;
@@ -118,6 +122,9 @@ function styleLayer(geojson, buildDate){
   }
   */
   var identity = geojson.properties.ExisFacil || geojson.properties.Rec1 || geojson.properties.Rec2;
+  if(identity == "CTReplace"){
+    opacity = 0;
+  }
   return { color: stylesByType[ identity ].color, opacity: opacity };
 }
 function describeLayer(geojson, layer, isBuilt){
@@ -283,6 +290,10 @@ var fiveBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_ser
     else{
       pathsByYears[ maxyear-1 ].push( path );
     }
+    var identity = geojson.properties.ExisFacil || geojson.properties.Rec1 || geojson.properties.Rec2;
+    if(identity == "CTReplace"){
+      return;
+    }
     layer.bindPopup( describeLayer(geojson, layer) );
   }
 }).addTo(map);
@@ -313,6 +324,10 @@ var thirtyBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_s
     }
     else{
       pathsByYears[ maxyear ].push( path );
+    }
+    var identity = geojson.properties.ExisFacil || geojson.properties.Rec1 || geojson.properties.Rec2;
+    if(identity == "CTReplace"){
+      return;
     }
     layer.bindPopup(describeLayer(geojson, layer));
   }
