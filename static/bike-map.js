@@ -36,6 +36,14 @@ map.on('zoomend', function(){
   }
 });
 
+// prevent primary routes color scheme from messing up map
+map.on('movestart', function(){
+  if(showPrimary){
+    $("#primary").removeClass("layer-select");
+    togglePrimary();
+  }
+});
+
 // add existing paths
 var pathsByYears = { };
 var minyear = 2007;
@@ -43,20 +51,21 @@ var currentyear = 2013;
 var maxyear = currentyear + 2; // represents +5year and +30year plans
 
 var stylesByType = {"PS":{"color":"#44f","label":"Paved Shoulder"},
-"SUP":{"label":"Shared-Use Path","color":"rgb(107,207,50)"},
+"SUP":{"label":"Shared-Use Path","color":"#4b9222"},
 "CT1-1":{"label":"Cycle Track","color":"rgb(172,35,141)"},
 "CT1-2":{"label":"Cycle Track","color":"rgb(172,35,141)"},
 "CT2-1":{"label":"Cycle Track","color":"rgb(172,35,141)"},
 "BFBL":{"label":"Buffered Bike Lane","color":"rgb(32,120,180)"},
 "BL":{"label":"Bike Lane","color":"rgb(32,120,180)"},
 "CL":{"label":"Bike Lane","color":"rgb(32,120,180)"},
-  "SRd":{"label":"Shared Road","color":"rgb(78,166,47)"},
+  "SRd":{"label":"Shared Road","color":"rgb(107,207,50)"},
 "BSBL":{"label":"Bus-Bike Lane","color":"rgb(166,206,227)"},
-  "NW":{"label":"Neighborway","color":"rgb(78,166,47)"},
+  "NW":{"label":"Neighborway","color":"rgb(107,207,50)"},
 "CFBL":{"label":"Contraflow Bike Lane","color":"rgb(32,120,180)"},
 "PSL":{"label":"Priority Shared Lane Markings","color":"rgb(166,206,227"},
 "ADV":{"label":"Advisory Lane","color":"rgb(166,206,227)"},
 "CTReplace":{"label":"Cycle Track","color":"rgb(0,0,0)"},
+"LocalRoute":{"label":"Local Route","color":"#FDE68C"},
 "SLM":{"label":"Shared-Lane Marking","color":"rgb(166,206,227)"}};
 
 var jurisdictions = {
@@ -76,7 +85,7 @@ var currentBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest
     return styleLayer(geojson, "current");
   },
   onEachFeature: function(geojson, layer){
-    var identity = geojson.properties.ExisFacil || geojson.properties.Rec1 || geojson.properties.Rec2;
+    var identity = geojson.properties.Rec1 || geojson.properties.ExisFacil;
     if(identity == "CTReplace"){
       return;
     }
@@ -87,7 +96,8 @@ var currentBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest
       layer: layer,
       five: (geojson.properties.FiveYearPlan || ""),
       existing: (geojson.properties.ExisFacil || ""),
-      rec1: (geojson.properties.Rec1 || "")
+      rec1: (geojson.properties.Rec1 || ""),
+      spine: (geojson.properties.Spine || 0)
     };
     if(typeof pathsByYears[adddate] == "undefined"){
       pathsByYears[adddate] = [ path ];
@@ -112,16 +122,21 @@ function styleLayer(geojson, buildDate){
     }
   }
   */
+  if(geojson.properties.Network && !isNaN(geojson.properties.Network * 1) && geojson.properties.Network * 1 == 2){
+    // local routes
+    return { color: stylesByType[ "LocalRoute" ].color, opacity: opacity };
+  }
   
-  /*
-  if(buildDate == "five" && geojson.properties.FiveYearPlan === null){
-    opacity = 0.35;
+  var identity;
+  if(buildDate == "current"){
+    identity = geojson.properties.ExisFacil;
   }
-  else if(buildDate == "thirty" && (geojson.properties.FiveYearPlan || (geojson.properties.InstallDate || !geojson.properties.ExisFacil) && geojson.properties.Rec1)){
-    opacity = 0.35;
+  else if(buildDate == "five" && geojson.properties.FiveYearPlan * 1 == 1.2){
+    identity = geojson.properties.Rec2 || geojson.properties.Rec1;
   }
-  */
-  var identity = geojson.properties.ExisFacil || geojson.properties.Rec1 || geojson.properties.Rec2;
+  else{
+    identity = geojson.properties.Rec1 || geojson.properties.Rec2;
+  }
   if(identity == "CTReplace"){
     opacity = 0;
   }
@@ -129,7 +144,10 @@ function styleLayer(geojson, buildDate){
 }
 function describeLayer(geojson, layer, isBuilt){
   var content = "";
-  var identity = geojson.properties.ExisFacil || geojson.properties.Rec1;
+  var identity = geojson.properties.ExisFacil;
+  if(!isBuilt){
+    identity = geojson.properties.Rec1 || geojson.properties.Rec2;
+  }
   if(typeof geojson.properties.STREET_NAM != "undefined" && geojson.properties.STREET_NAM && geojson.properties.STREET_NAM.length){
     content += "<h4>" + geojson.properties.STREET_NAM + "</h4>";
     content += "<p>" + stylesByType[ identity ].label + "</p>";
@@ -142,10 +160,10 @@ function describeLayer(geojson, layer, isBuilt){
   }
   if(typeof geojson.properties.Spine != "undefined"){
     if(geojson.properties.Spine){
-      content += "<p>Primary Road</p>";
+      content += "<p>Primary Route</p>";
     }
     else{
-      content += "<p>Secondary Road</p>";
+      content += "<p>Secondary Route</p>";
     }
   }
   /*
@@ -197,7 +215,6 @@ function updateMapTime(uptoyear){
     if(!showFive){
       showFive = true;
       map.addLayer(fiveBikes);
-      map.removeLayer(currentBikes);
     }
   }
   else if(uptoyear == maxyear){
@@ -211,7 +228,6 @@ function updateMapTime(uptoyear){
     if(!showThirty){
       showThirty = true;
       map.addLayer(thirtyBikes);
-      map.removeLayer(currentBikes);
     }
   }
   else{
@@ -231,6 +247,12 @@ function updateMapTime(uptoyear){
   for(var year in pathsByYears){
     if(year <= uptoyear){
       for(var i=0;i<pathsByYears[year].length;i++){
+        if(uptoyear == maxyear && pathsByYears[year][i].rec1){
+          continue;
+        }
+        if(uptoyear == maxyear-1 && pathsByYears[year][i].rec1 && pathsByYears[year][i].five){
+          continue;
+        }
         map.hasLayer(pathsByYears[year][i].layer) || map.addLayer(pathsByYears[year][i].layer);
       }
     }
@@ -268,6 +290,9 @@ $(".layer").click(function(e){
   else if(e.target.id == "imagery"){
     toggleImagery();
   }
+  else if(e.target.id == "primary"){
+    togglePrimary();
+  }
 });
 
 // future bike layers
@@ -282,7 +307,8 @@ var fiveBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/se
       layer: layer,
       five: (geojson.properties.FiveYearPlan || ""),
       existing: (geojson.properties.ExisFacil || ""),
-      rec1: (geojson.properties.Rec1 || "")
+      rec1: (geojson.properties.Rec1 || ""),
+      spine: (geojson.properties.Spine || 0)
     };
     if(typeof pathsByYears[ maxyear-1 ] == "undefined" ){
       pathsByYears[ maxyear-1 ] = [ path ];
@@ -303,6 +329,7 @@ if(!showFive){
 
 $("#seeplanned5").click(function(e){
   $("#yearslider").slider({ value: maxyear-1 });
+  updateMapTime( currentyear );
   updateMapTime( maxyear-1 );
 });
 
@@ -317,7 +344,8 @@ var thirtyBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/
       layer: layer,
       five: (geojson.properties.FiveYearPlan || ""),
       existing: (geojson.properties.ExisFacil || ""),
-      rec1: (geojson.properties.Rec1 || "")
+      rec1: (geojson.properties.Rec1 || ""),
+      spine: (geojson.properties.Spine || 0)
     };
     if(typeof pathsByYears[ maxyear ] == "undefined" ){
       pathsByYears[ maxyear ] = [ path ];
@@ -338,6 +366,7 @@ if(!showThirty){
 
 $("#seeplanned30").click(function(e){
   $("#yearslider").slider({ value: maxyear });
+  updateMapTime( currentyear );
   updateMapTime( maxyear );
 });
 
@@ -437,6 +466,52 @@ function toggleMBTA(){
     }
     map.addLayer(mbta);
     map.addLayer(mbtaStations);
+  }
+}
+
+// primary routes
+var showPrimary = false;
+function togglePrimary(){
+  showPrimary = !showPrimary;
+  for(var year in pathsByYears){
+    var yearType = "current";
+    if(year == maxyear - 1){
+      yearType = "five";
+    }
+    if(year == maxyear){
+      yearType = "thirty";
+    }
+    for(var i=0;i<pathsByYears[year].length;i++){
+      if(showPrimary){
+        if(typeof pathsByYears[year][i].color == "undefined"){
+          try{
+            pathsByYears[year][i].color = pathsByYears[year][i].layer.options.color;
+          }
+          catch(e){
+            pathsByYears[year][i].color = [ ];
+            for(var c=0;c<pathsByYears[year][i].layer.getLayers().length;c++){
+              pathsByYears[year][i].color.push( pathsByYears[year][i].layer.getLayers()[c].options.color );
+            }
+          }
+        }
+        if(pathsByYears[year][i].spine){
+          pathsByYears[year][i].layer.setStyle({ color: "orange" });
+        }
+        else{
+          pathsByYears[year][i].layer.setStyle({ color: "#00f" });
+        }
+      }
+      else{
+        if(typeof pathsByYears[year][i].color == "string"){
+          pathsByYears[year][i].layer.setStyle({ color: pathsByYears[year][i].color });
+        }
+        else{
+          for(var c=0;c<pathsByYears[year][i].layer.getLayers().length;c++){
+            pathsByYears[year][i].layer.getLayers()[c].setStyle({ color: pathsByYears[year][i].color[c] });
+          }
+        }
+      }
+    }
   }
 }
 
