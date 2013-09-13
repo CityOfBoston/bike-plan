@@ -117,3 +117,50 @@ button:active {
   filter: gray;
   -webkit-filter: grayscale(1);
 }
+.thinkey{
+  padding: 0px 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+#shareduse{
+  color: #4b9222;
+  background-color: #4b9222;
+}
+#protected{
+  color: rgb(172,35,141);
+  background-color: rgb(172,35,141);
+}
+#exclusive{
+  color: rgb(32,120,180);
+  background-color: rgb(32,120,180);
+}
+#sharedroad{
+  color: rgb(107,207,50);
+  background-color: rgb(107,207,50);
+}
+#sharedlane{
+  color: rgb(166,206,227);
+  background-color: rgb(166,206,227);
+}
+#recommended{
+  color: #FDE68C;
+  background-color: #FDE68C;
+}
+.shareduse{
+  color: #4b9222;
+}
+.protected{
+  color: rgb(172,35,141);
+}
+.exclusive{
+  color: rgb(32,120,180);
+}
+.sharedroad{
+  color: rgb(107,207,50);
+}
+.sharedlane{
+  color: rgb(166,206,227);
+}
+.recommended{
+  color: #DDC66C;
+}

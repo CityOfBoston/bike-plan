@@ -1,3 +1,5 @@
+L_PREFER_CANVAS = true;
+
 if(typeof console == "undefined" || typeof console.log == "undefined"){
   console = { log: function(e){ } };
 }
@@ -78,6 +80,16 @@ map.on('movestart', function(){
     togglePrimary();
   }
 });
+
+// map color band key
+$(".thinkey").tooltip();
+$(".thinkey").tooltip("enable");
+$("#shareduse").tooltip({ content: "<h4 class='shareduse'>Shared Use Path</h4>Off-road pathway physically separated from traffic and designated for shared use or with an adjacent separated paths for bicyclists and pedestrians." });
+$("#protected").tooltip({ content: "<h4 class='protected'>Protected Lane</h4><h4>Cycle Track</h4>Exclusive bicycle facility separated from motor vehicle lanes and sidewalks by fixed objects such as parked cars, curbing, bollards or flexposts." });
+$("#exclusive").tooltip({ content: "<h4 class='exclusive'>Exclusive Lane</h4><h4>Bicycle Lane</h4>On-road bicycle facility designated for exclusive use by bicyclists through pavement markings and signs.<h4>Buffered Bicycle Lane</h4>Bicycle lane with an additional painted buffer to provide more separation from motor vehicles.<h4>Contraflow Bicycle Lane</h4>Bicycle lanes installed on a one-way street that allow bicyclists to travel in both directions while vehicular traffic remains one-way only.<h4>Climbing Bike Lane</h4>Bicycle lane in the uphill direction and shared lane markings in the downhill direction. Used on hills where there is insufficient space for a bike lane in both directions." });
+$("#sharedlane").tooltip({ content: "<h4 class='sharedlane'>Shared Lane</h4><h4>Bus-Bicycle Lane</h4>Shared on-road facility designated only for bus and bicycle use.<h4>Shared Lane</h4>Shared bicycle and motor vehicle travel lanes denoted using pavement markings (commonly referred to as “sharrows”) and signs. Used in constrained corridors where the speed limit is no more than 35 MPH.<h4>Advisory Lanes</h4>Roadway with dashed bike lanes on both sides and no center line. Motor vehicles share the middle of the street and are permitted to enter the bike lane to give way to oncoming motor vehicles.<h4>Priority Shared Lane</h4>Shared lane with additional visual cues to denote bicycle priority and encourages motor vehicles to pass bicycles by switching lanes." });
+$("#sharedroad").tooltip({ content: "<h4 class='sharedroad'>Shared Road</h4><h4>Shared Street</h4>Street with very slow speeds that allow all modes of travel to share one space (sidewalks are often blended with the roadway).<h4>Neighborway</h4>Also known as a bicycle boulevard, a neighborway is a quiet, low-volume residential street with added traffic calming. This type of slow street gives priority to bicyclists and pedestrians."});
+$("#recommended").tooltip({ content: "<h4 class='recommended'>Recommended Local Route</h4>Unimproved quiet residential street that provides connectivity to neighborhood destinations and primary routes." });
 
 // add existing paths
 var pathsByYears = { };
@@ -626,5 +638,7 @@ function preload(srcs){
   for(var i=0; i<srcs.length; i++){
     images[i] = new Image();
     images[i].src = srcs[i];
+    images[i].style.display = "none";
+    $(document.body).append(images[i]);
   }
 }
