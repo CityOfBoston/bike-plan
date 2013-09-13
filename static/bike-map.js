@@ -91,6 +91,10 @@ $("#sharedlane").tooltip({ content: "<h4 class='sharedlane'>Shared Lane</h4><h4>
 $("#sharedroad").tooltip({ content: "<h4 class='sharedroad'>Shared Road</h4><h4>Shared Street</h4>Street with very slow speeds that allow all modes of travel to share one space (sidewalks are often blended with the roadway).<h4>Neighborway</h4>Also known as a bicycle boulevard, a neighborway is a quiet, low-volume residential street with added traffic calming. This type of slow street gives priority to bicyclists and pedestrians."});
 $("#recommended").tooltip({ content: "<h4 class='recommended'>Recommended Local Route</h4>Unimproved quiet residential street that provides connectivity to neighborhood destinations and primary routes." });
 
+$("#primaryrt").tooltip({ content: "<h4 class='primaryrt'>Primary Routes</h4>Primary routes connect neighborhood centers, regional multi-use paths, transit hubs, major employment centers, and institutional destinations." });
+$("#secondaryrt").tooltip({ content: "<h4 class='secondaryrt'>Secondary Routes</h4>Secondary Routes stretch into neighborhoods and provide access to local businesses and neighborhood destinations." });
+
+
 // add existing paths
 var pathsByYears = { };
 var minyear = 2007;
@@ -578,6 +582,18 @@ function toggleMBTA(){
 var showPrimary = false;
 function togglePrimary(){
   showPrimary = !showPrimary;
+  if(showPrimary){
+    $(".mainkey").css({ display: "none" });
+    $(".primarykey").css({ display: "inline" });
+    $("#primaryrt").css({ color: "orange", "background-color": "orange" });
+    $("#secondaryrt").css({ color: "#aaa", "background-color": "#aaa" });
+    $(".primaryrt").css({ color: "orange", "background-color": "orange" });
+    $(".secondaryrt").css({ color: "#aaa", "background-color": "#aaa" });
+  }
+  else{
+    $(".mainkey").css({ display: "inline" });
+    $(".primarykey").css({ display: "none" });
+  }
   for(var year in pathsByYears){
     var yearType = "current";
     if(year == fiveyear){

@@ -164,3 +164,20 @@ button:active {
 .recommended{
   color: #DDC66C;
 }
+.primarykey{
+  display: none;
+}
+#primaryrt{
+  background-color: "orange";
+  color: "orange";
+}
+#secondaryrt{
+  background-color: "#aaa";
+  color: "#aaa";
+}
+.primaryrt{
+  color: "orange";
+}
+.secondaryrt{
+  color: "#aaa";
+}
