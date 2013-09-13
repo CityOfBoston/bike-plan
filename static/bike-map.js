@@ -101,7 +101,7 @@ var stylesByType = {"PS":{"color":"#44f","label":"Paved Shoulder"},
 "PSL":{"label":"Priority Shared Lane Markings","color":"rgb(166,206,227"},
 "ADV":{"label":"Advisory Lane","color":"rgb(166,206,227)"},
 "CTReplace":{"label":"Cycle Track","color":"rgb(0,0,0)"},
-"LocalRoute":{"label":"Local Route","color":"#FDE68C"},
+"LocalRoute":{"label":"Unimproved","color":"#FDE68C"},
 "SLM":{"label":"Shared-Lane Marking","color":"rgb(166,206,227)"}};
 
 var jurisdictions = {
@@ -125,7 +125,7 @@ var currentBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest
     if(identity == "CTReplace"){
       return;
     }
-    layer.bindPopup(describeLayer(geojson, layer, true));
+    layer.bindPopup(describeLayer(geojson, layer, "current"));
     // add to timeline
     var adddate = geojson.properties.InstallDate || 0;
     var path = {
@@ -151,16 +151,6 @@ function styleLayer(geojson, buildDate){
     opacity = 0.4;
   }
   
-  /*
-  if(isBuilt){
-    if(geojson.properties.Spine){
-      layer.setStyle({ color: "orange", opacity: opacity });
-    }
-    else{
-      layer.setStyle({ color: "#44f", opacity: opacity });
-    }
-  }
-  */
   if(geojson.properties.Network && !isNaN(geojson.properties.Network * 1) && geojson.properties.Network * 1 == 2){
     // local routes
     return { color: stylesByType[ "LocalRoute" ].color, opacity: opacity };
@@ -173,20 +163,61 @@ function styleLayer(geojson, buildDate){
   else if(buildDate == "five" && geojson.properties.FiveYearPlan * 1 == 1.2){
     identity = geojson.properties.Rec2 || geojson.properties.Rec1;
   }
-  else{
+  else if(buildDate == "five" && geojson.properties.FiveYearPlan * 1 == 1.1){
     identity = geojson.properties.Rec1 || geojson.properties.Rec2;
+  }
+  else if(buildDate == "thirty"){
+    identity = geojson.properties.Rec1 || geojon.properties.Rec2;
   }
   if(identity == "CTReplace"){
     opacity = 0;
   }
   return { color: stylesByType[ identity ].color, opacity: opacity };
 }
-function describeLayer(geojson, layer, isBuilt){
+function describeLayer(geojson, layer, buildDate){
   var content = "";
-  var identity = geojson.properties.ExisFacil;
-  if(!isBuilt){
-    identity = geojson.properties.Rec1 || geojson.properties.Rec2;
+  var identity;
+  // showCurrent / showFive / showThirty is not equivalent to buildDate. Some roads differ in current and thirty year plan but five year plan === current
+  var showCurrent = false;
+  var showFive = false;
+  var showThirty = false;
+  if(buildDate == "current"){
+    identity = geojson.properties.ExisFacil;
+    showCurrent = true;
   }
+  else if(buildDate == "five"){
+    if(!isNaN(geojson.properties.FiveYearPlan * 1)){
+      showFive = true;
+      if(geojson.properties.FiveYearPlan * 1 == 1.1){
+        identity = geojson.properties.Rec1;
+      }
+      else if(geojson.properties.FiveYearPlan * 1 == 1.2){
+        identity = geojson.properties.Rec2 || geojson.properties.Rec1;
+      }
+    }
+  }
+  else if(buildDate == "thirty"){
+    if(!isNaN(geojson.properties.FiveYearPlan * 1)){
+      identity = geojson.properties.Rec1;
+      if(geojson.properties.FiveYearPlan * 1 == 1.1){
+        showFive = true;
+      }
+      else{
+        showThirty = true;
+      }
+    }
+    else{
+      showThirty = true;
+      identity = geojson.properties.Rec1 || geojson.properties.Rec2;
+    }
+  }
+  // LocalRoute overwrites existing facilities
+  if(geojson.properties.Network && !isNaN(geojson.properties.Network * 1) && geojson.properties.Network * 1 == 2){
+    identity = "LocalRoute";
+  }
+  
+  try{
+
   if(typeof geojson.properties.STREET_NAM != "undefined" && geojson.properties.STREET_NAM && geojson.properties.STREET_NAM.length){
     content += "<h4>" + geojson.properties.STREET_NAM + "</h4><p>";
     content += "Facility: " + stylesByType[ identity ].label + "<br/>";
@@ -194,17 +225,30 @@ function describeLayer(geojson, layer, isBuilt){
   else{
     content += "<h4>Facility: " + stylesByType[ identity ].label + "</h4><p>";
   }
-  if(isBuilt && geojson.properties.InstallDate * 1){
+  
+  }
+  catch(e){
+    console.log( geojson.properties );
+    console.log( buildDate );
+  }
+  
+  if(identity == "LocalRoute"){
+    content += "Status: NA<br/>";
+  }
+  else if(showCurrent && geojson.properties.InstallDate){
     content += "Status: Installed " + geojson.properties.InstallDate + "<br/>";
   }
-  else if(geojson.properties.FiveYearPlan * 1 == 1.1 || geojson.properties.FiveYearPlan * 1 == 1.2){
+  else if(showFive){
     content += "Status: To be installed, 5 Year Plan<br/>";
   }
-  else if(!geojson.properties.ExisFacil && (geojson.properties.Rec1 || geojson.properties.Rec2)){
+  else if(showThirty){
     content += "Status: To be installed, 30 Year Plan<br/>";
   }
   
-  if(typeof geojson.properties.Spine != "undefined"){
+  if(identity == "LocalRoute"){
+    content += "Route: Suggested<br/>";
+  }
+  else if(typeof geojson.properties.Spine != "undefined"){
     if(geojson.properties.Spine){
       content += "Route: Primary<br/>";
     }
@@ -212,11 +256,7 @@ function describeLayer(geojson, layer, isBuilt){
       content += "Route: Secondary<br/>";
     }
   }
-  /*
-  if(!isBuilt && typeof geojson.properties.Rec2 != "undefined" && geojson.properties.Rec2 && geojson.properties.Rec2.length && typeof stylesByType[ geojson.properties.Rec2 ] != "undefined"){
-    content += "<p>Secondary recommendation: " + stylesByType[ geojson.properties.Rec2 ].label + "</p>";
-  }
-  */
+
   if(typeof geojson.properties.JURISDICTI != "undefined" && geojson.properties.JURISDICTI !== null && geojson.properties.JURISDICTI.length){
     content += jurisdictions[ geojson.properties.JURISDICTI ] + "<br/>";
   }
@@ -373,7 +413,7 @@ var fiveBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/se
     if(identity == "CTReplace"){
       return;
     }
-    layer.bindPopup( describeLayer(geojson, layer) );
+    layer.bindPopup( describeLayer(geojson, layer, "five") );
   }
 }).addTo(map);
 if(!showFive){
@@ -410,7 +450,7 @@ var thirtyBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/
     if(identity == "CTReplace"){
       return;
     }
-    layer.bindPopup(describeLayer(geojson, layer));
+    layer.bindPopup(describeLayer(geojson, layer, "thirty"));
   }
 }).addTo(map);
 if(!showThirty){
