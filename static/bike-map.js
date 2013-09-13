@@ -7,6 +7,7 @@ if(typeof console == "undefined" || typeof console.log == "undefined"){
 var map = L.map('map', {
   center: [ 42.32, -71.107292 ],
   zoom: 12,
+  minZoom: 10,
   maxZoom: 17,
   zoomControl: false
 });
