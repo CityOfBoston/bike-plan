@@ -14,14 +14,49 @@ map.addControl(L.control.zoom({ position: 'topright' }));
 var basemap = L.esri.basemapLayer("Topographic").addTo(map);
 
 var zoomedOut = false;
+var semitransparent = false;
 map.on('zoomend', function(){
   var zoom = map.getZoom();
+  if(zoom >= 15 && !semitransparent){
+    semitransparent = true;
+    for(var year in pathsByYears){
+      for(var i=0;i<pathsByYears[year].length;i++){
+        var opacity = 0;
+        try{
+          opacity = pathsByYears[year][i].layer.options.opacity;
+        }
+        catch(e){
+          opacity = pathsByYears[year][i].layer.getLayers()[0].options.opacity;
+        }
+        if(opacity){
+          pathsByYears[year][i].layer.setStyle({ opacity: 0.4 });
+        }
+      }
+    }
+  }
+  else if(zoom < 15 && semitransparent){
+    semitransparent = false;
+    for(var year in pathsByYears){
+      for(var i=0;i<pathsByYears[year].length;i++){
+        var opacity = 0;
+        try{
+          opacity = pathsByYears[year][i].layer.options.opacity;
+        }
+        catch(e){
+          opacity = pathsByYears[year][i].layer.getLayers()[0].options.opacity;
+        }
+        if(opacity){
+          pathsByYears[year][i].layer.setStyle({ opacity: 0.8 });
+        }
+      }
+    }
+  }
   if(zoom >= 13 && zoomedOut){
     // zoom in style
     zoomedOut = false;
     for(var year in pathsByYears){
       for(var i=0;i<pathsByYears[year].length;i++){
-        pathsByYears[year][i].layer.setStyle({ weight: 5 });
+        pathsByYears[year][i].layer.setStyle({ weight: 4 });
       }
     }
   }
@@ -48,7 +83,8 @@ map.on('movestart', function(){
 var pathsByYears = { };
 var minyear = 2007;
 var currentyear = 2013;
-var maxyear = currentyear + 2; // represents +5year and +30year plans
+var fiveyear = currentyear + 3;
+var maxyear = currentyear + 6; // represents +5year and +30year plans
 
 var stylesByType = {"PS":{"color":"#44f","label":"Paved Shoulder"},
 "SUP":{"label":"Shared-Use Path","color":"#4b9222"},
@@ -70,14 +106,14 @@ var stylesByType = {"PS":{"color":"#44f","label":"Paved Shoulder"},
 
 var jurisdictions = {
   "0": "Jurisdiction: Unaccepted by city or town",
-  "1": "Jurisdiction of Massachusetts Highway Department",
-  "2": "Jurisdiction of the City of Boston",
-  "3": "Jurisdiction of Department of Conservation and Recreation",
-  "4": "Jurisdiction of Massachusetts Turnpike Authority",
-  "5": "Jurisdiction of Massachusetts Port Authority",
-  "B": "Jurisdiction of State College or University",
+  "1": "Jurisdiction: Massachusetts Highway Department",
+  "2": "Jurisdiction: City of Boston",
+  "3": "Jurisdiction: Department of Conservation and Recreation",
+  "4": "Jurisdiction: Massachusetts Turnpike Authority",
+  "5": "Jurisdiction: Massachusetts Port Authority",
+  "B": "Jurisdiction: State College or University",
   "H": "Jurisdiction: Private",
-  "M": "Jurisdiction of MBTA"
+  "M": "Jurisdiction: MBTA"
 };
 
 var currentBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/services/BaseServices/Bike_network/FeatureServer/0", {
@@ -111,6 +147,9 @@ var currentBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest
 function styleLayer(geojson, buildDate){
 
   var opacity = 0.8;
+  if(semitransparent){
+    opacity = 0.4;
+  }
   
   /*
   if(isBuilt){
@@ -149,21 +188,28 @@ function describeLayer(geojson, layer, isBuilt){
     identity = geojson.properties.Rec1 || geojson.properties.Rec2;
   }
   if(typeof geojson.properties.STREET_NAM != "undefined" && geojson.properties.STREET_NAM && geojson.properties.STREET_NAM.length){
-    content += "<h4>" + geojson.properties.STREET_NAM + "</h4>";
-    content += "<p>" + stylesByType[ identity ].label + "</p>";
+    content += "<h4>" + geojson.properties.STREET_NAM + "</h4><p>";
+    content += "Facility: " + stylesByType[ identity ].label + "<br/>";
   }
   else{
-    content += "<h4>" + stylesByType[ identity ].label + "</h4>";
+    content += "<h4>Facility: " + stylesByType[ identity ].label + "</h4><p>";
   }
   if(isBuilt && geojson.properties.InstallDate * 1){
-    content += "<p>Installed " + geojson.properties.InstallDate + "</p>";
+    content += "Status: Installed " + geojson.properties.InstallDate + "<br/>";
   }
+  else if(geojson.properties.FiveYearPlan * 1 == 1.1 || geojson.properties.FiveYearPlan * 1 == 1.2){
+    content += "Status: To be installed, 5 Year Plan<br/>";
+  }
+  else if(!geojson.properties.ExisFacil && (geojson.properties.Rec1 || geojson.properties.Rec2)){
+    content += "Status: To be installed, 30 Year Plan<br/>";
+  }
+  
   if(typeof geojson.properties.Spine != "undefined"){
     if(geojson.properties.Spine){
-      content += "<p>Primary Route</p>";
+      content += "Route: Primary<br/>";
     }
     else{
-      content += "<p>Secondary Route</p>";
+      content += "Route: Secondary<br/>";
     }
   }
   /*
@@ -172,17 +218,24 @@ function describeLayer(geojson, layer, isBuilt){
   }
   */
   if(typeof geojson.properties.JURISDICTI != "undefined" && geojson.properties.JURISDICTI !== null && geojson.properties.JURISDICTI.length){
-    content += "<p>" + jurisdictions[ geojson.properties.JURISDICTI ] + "</p>";
+    content += jurisdictions[ geojson.properties.JURISDICTI ] + "<br/>";
   }
   if(typeof geojson.properties.KeyBus != "undefined" && geojson.properties.KeyBus){
-    content += "<p>Along key MBTA bus route</p>";
+    content += "Key Bus Route<br/>";
   }
-  if(typeof geojson.properties.Parking != "undefined" && geojson.properties.Parking && geojson.properties.Parking.length){
-    content += "<p>Parking: " + geojson.properties.Parking + "</p>";
+  else{
+    content += "Key Bus Route: NA<br/>";  
+  }
+  if(typeof geojson.properties.Parking != "undefined" && geojson.properties.Parking){
+    content += "Parking Sides: " + geojson.properties.Parking + "<br/>";
+  }
+  else{
+    content += "Parking Sides: NA<br/>";  
   }
   if(typeof geojson.properties.TravelLanes != "undefined" && geojson.properties.TravelLanes){
-    content += "<p>Travel Lanes: " + geojson.properties.TravelLanes + "</p>";
+    content += "Travel Lanes: " + geojson.properties.TravelLanes + "<br/>";
   }
+  content += "</p>";
   return content;
 }
 
@@ -204,7 +257,7 @@ $("#yearslider").slider({
   }
 });
 function updateMapTime(uptoyear){
-  if(uptoyear == maxyear-1){
+  if(uptoyear == fiveyear){
     $("#year").text("+5 years");
     $("#bikesymbol")[0].src = "static/Trail-a-Bike.png";
     $("#bikesymbol").addClass("future");
@@ -250,7 +303,7 @@ function updateMapTime(uptoyear){
         if(uptoyear == maxyear && pathsByYears[year][i].rec1){
           continue;
         }
-        if(uptoyear == maxyear-1 && pathsByYears[year][i].rec1 && pathsByYears[year][i].five){
+        if(uptoyear == fiveyear && pathsByYears[year][i].rec1 && pathsByYears[year][i].five){
           continue;
         }
         map.hasLayer(pathsByYears[year][i].layer) || map.addLayer(pathsByYears[year][i].layer);
@@ -310,11 +363,11 @@ var fiveBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/se
       rec1: (geojson.properties.Rec1 || ""),
       spine: (geojson.properties.Spine || 0)
     };
-    if(typeof pathsByYears[ maxyear-1 ] == "undefined" ){
-      pathsByYears[ maxyear-1 ] = [ path ];
+    if(typeof pathsByYears[ fiveyear ] == "undefined" ){
+      pathsByYears[ fiveyear ] = [ path ];
     }
     else{
-      pathsByYears[ maxyear-1 ].push( path );
+      pathsByYears[ fiveyear ].push( path );
     }
     var identity = geojson.properties.ExisFacil || geojson.properties.Rec1 || geojson.properties.Rec2;
     if(identity == "CTReplace"){
@@ -328,9 +381,9 @@ if(!showFive){
 }
 
 $("#seeplanned5").click(function(e){
-  $("#yearslider").slider({ value: maxyear-1 });
+  $("#yearslider").slider({ value: fiveyear });
   updateMapTime( currentyear );
-  updateMapTime( maxyear-1 );
+  updateMapTime( fiveyear );
 });
 
 var showThirty = false;
@@ -475,7 +528,7 @@ function togglePrimary(){
   showPrimary = !showPrimary;
   for(var year in pathsByYears){
     var yearType = "current";
-    if(year == maxyear - 1){
+    if(year == fiveyear){
       yearType = "five";
     }
     if(year == maxyear){
@@ -486,28 +539,37 @@ function togglePrimary(){
         if(typeof pathsByYears[year][i].color == "undefined"){
           try{
             pathsByYears[year][i].color = pathsByYears[year][i].layer.options.color;
+            pathsByYears[year][i].opacity = pathsByYears[year][i].layer.options.opacity;
           }
           catch(e){
             pathsByYears[year][i].color = [ ];
             for(var c=0;c<pathsByYears[year][i].layer.getLayers().length;c++){
               pathsByYears[year][i].color.push( pathsByYears[year][i].layer.getLayers()[c].options.color );
             }
+            pathsByYears[year][i].opacity = pathsByYears[year][i].layer.getLayers()[0].options.opacity;
           }
         }
         if(pathsByYears[year][i].spine){
           pathsByYears[year][i].layer.setStyle({ color: "orange" });
         }
         else{
-          pathsByYears[year][i].layer.setStyle({ color: "#00f" });
+          pathsByYears[year][i].layer.setStyle({ color: "#aaa" });
         }
       }
       else{
+        var opacity = 0.8;
+        if(semitransparent){
+          opacity = 0.4;
+        }
+        if(!pathsByYears[year][i].opacity){
+          opacity = 0;
+        }
         if(typeof pathsByYears[year][i].color == "string"){
-          pathsByYears[year][i].layer.setStyle({ color: pathsByYears[year][i].color });
+          pathsByYears[year][i].layer.setStyle({ color: pathsByYears[year][i].color, opacity: opacity });
         }
         else{
           for(var c=0;c<pathsByYears[year][i].layer.getLayers().length;c++){
-            pathsByYears[year][i].layer.getLayers()[c].setStyle({ color: pathsByYears[year][i].color[c] });
+            pathsByYears[year][i].layer.getLayers()[c].setStyle({ color: pathsByYears[year][i].color[c], opacity: opacity });
           }
         }
       }

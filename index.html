@@ -21,9 +21,12 @@
         <div id="yearslider">
         </div>
         <br/>
+        <small>Drag the slider to map existing and planned routes</small>
+        <!--
         <button id="seeplanned5" class="btn btn-primary">5 Year Plan</button>
         <br/>
         <button id="seeplanned30" class="btn btn-primary">30 Year Plan</button>
+        -->
       </div>
       <div class="overlay-left lower">
         <h4>Layers</h4>
@@ -41,7 +44,7 @@
         </div>
         <div id="primary" class="layer">
           <div class="layer-symbol">_</div>
-          <span class="layer-label">Primary Routes</span>
+          <span class="layer-label">Primary and Secondary Routes</span>
         </div>
         <!--
         <div class="layer">
@@ -53,8 +56,11 @@
           <span class="layer-label">Projects Underway</span>
         </div>
         -->
-        <img src="static/boston-bikes-box-logo.png" style="height:70px;"/>
         <img src="static/bostonseal.png" style="height:70px;"/>
+        <img src="static/boston-bikes-box-logo.png" style="height:70px;"/>
+        <br/>
+        <br/>
+        <button id="comments" class="btn btn-primary" onclick="window.location='http://www.surveymonkey.com/s/BosBikeNetwork';">Comments</button>
       </div>
     </div>
     <script type="text/javascript" src="static/leaflet.js"></script>
@@ -72,5 +78,16 @@
     Future bike: Simon Child, from The Noun Project
     Tandem bike: James Evans, from The Noun Project
     -->
+
+    <script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-3838275-6']);
+_gaq.push(['_trackPageview']);
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+    </script>
   </body>
 </html>

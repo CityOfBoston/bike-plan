@@ -33,7 +33,9 @@ html, body, #map{
 }
 
 .lower{
-  top: 272px;
+  top: 242px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 .layer{
   text-align: left;
