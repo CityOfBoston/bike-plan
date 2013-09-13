@@ -247,7 +247,7 @@ function describeLayer(geojson, layer, buildDate){
   if(identity == "LocalRoute"){
     content += "Status: NA<br/>";
   }
-  else if(showCurrent && geojson.properties.InstallDate){
+  else if(showCurrent && !isNaN(geojson.properties.InstallDate * 1) && geojson.properties.InstallDate * 1 != 0){
     content += "Status: Installed " + geojson.properties.InstallDate + "<br/>";
   }
   else if(showFive){
