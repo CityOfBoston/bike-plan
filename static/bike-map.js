@@ -159,7 +159,10 @@ var currentBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest
       pathsByYears[adddate].push( path );
     }
   }
-}).addTo(map);
+});
+setTimeout(function(){
+  currentBikes.addTo(map);
+}, 250);
 
 function styleLayer(geojson, buildDate){
 
@@ -233,20 +236,12 @@ function describeLayer(geojson, layer, buildDate){
     identity = "LocalRoute";
   }
   
-  try{
-
   if(typeof geojson.properties.STREET_NAM != "undefined" && geojson.properties.STREET_NAM && geojson.properties.STREET_NAM.length){
     content += "<h4>" + geojson.properties.STREET_NAM + "</h4><p>";
     content += "Facility: " + stylesByType[ identity ].label + "<br/>";
   }
   else{
     content += "<h4>Facility: " + stylesByType[ identity ].label + "</h4><p>";
-  }
-  
-  }
-  catch(e){
-    console.log( geojson.properties );
-    console.log( buildDate );
   }
   
   if(identity == "LocalRoute"){
@@ -298,10 +293,6 @@ function describeLayer(geojson, layer, buildDate){
 
 // time slider on overlay
 L.DomEvent.disableClickPropagation( $(".overlay-left")[0] );
-var phases = ["static/tricycle.png", "static/trainingwheels.png", "static/regbike.png"];
-preload(phases);
-preload(["static/CargoBike.png"]);
-preload(["static/Trail-a-Bike.png"]);
 
 $("#yearslider").slider({
   min: minyear,
@@ -432,16 +423,21 @@ var fiveBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/se
     }
     layer.bindPopup( describeLayer(geojson, layer, "five") );
   }
-}).addTo(map);
-if(!showFive){
-  map.removeLayer(fiveBikes);
-}
+});
+setTimeout(function(){
+  fiveBikes.addTo(map);
+  if(!showFive){
+    map.removeLayer(fiveBikes);
+  }
+}, 760);
 
+/*
 $("#seeplanned5").click(function(e){
   $("#yearslider").slider({ value: fiveyear });
   updateMapTime( currentyear );
   updateMapTime( fiveyear );
 });
+*/
 
 var showThirty = false;
 
@@ -469,16 +465,21 @@ var thirtyBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/
     }
     layer.bindPopup(describeLayer(geojson, layer, "thirty"));
   }
-}).addTo(map);
-if(!showThirty){
-  map.removeLayer(thirtyBikes);
-}
+});
+setTimeout(function(){
+  thirtyBikes.addTo(map);
+  if(!showThirty){
+    map.removeLayer(thirtyBikes);
+  }
+}, 760);
 
+/*
 $("#seeplanned30").click(function(e){
   $("#yearslider").slider({ value: maxyear });
   updateMapTime( currentyear );
   updateMapTime( maxyear );
 });
+*/
 
 // imagery layer
 var imagery = L.tileLayer("http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}");
@@ -648,14 +649,4 @@ function togglePrimary(){
 
 function credits(){
   alert("Map by City of Boston; Training Wheels by Ribbla Team, from The Noun Project; Future Bike by Simon Child, from The Noun Project; Tandem Bike by James Evans, from the Noun Project");
-}
-
-function preload(srcs){
-  var images = [ ];
-  for(var i=0; i<srcs.length; i++){
-    images[i] = new Image();
-    images[i].src = srcs[i];
-    images[i].style.display = "none";
-    $(document.body).append(images[i]);
-  }
 }
