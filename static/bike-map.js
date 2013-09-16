@@ -161,7 +161,9 @@ var currentBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest
   }
 });
 setTimeout(function(){
-  currentBikes.addTo(map);
+  if(!isIE() || isIE() > 8){
+    currentBikes.addTo(map);
+  }
 }, 250);
 
 function styleLayer(geojson, buildDate){
@@ -425,11 +427,13 @@ var fiveBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/se
   }
 });
 setTimeout(function(){
-  fiveBikes.addTo(map);
-  if(!showFive){
-    map.removeLayer(fiveBikes);
+  if(!isIE() || isIE() > 8){
+    fiveBikes.addTo(map);
+    if(!showFive){
+      fiveBikes.removeLayer(map);
+    }
   }
-}, 760);
+}, 500);
 
 /*
 $("#seeplanned5").click(function(e){
@@ -467,11 +471,13 @@ var thirtyBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/
   }
 });
 setTimeout(function(){
-  thirtyBikes.addTo(map);
-  if(!showThirty){
-    map.removeLayer(thirtyBikes);
+  if(!isIE() || isIE() > 8){
+    thirtyBikes.addTo(map);
+    if(!showThirty){
+      map.removeLayer(thirtyBikes);
+    }
   }
-}, 760);
+}, 500);
 
 /*
 $("#seeplanned30").click(function(e){
@@ -649,4 +655,13 @@ function togglePrimary(){
 
 function credits(){
   alert("Map by City of Boston; Training Wheels by Ribbla Team, from The Noun Project; Future Bike by Simon Child, from The Noun Project; Tandem Bike by James Evans, from the Noun Project");
+}
+
+function isIE(){
+  var myNav = navigator.userAgent.toLowerCase();
+  return (myNav.indexOf('msie') != -1) ? parseInt(myNav.split('msie')[1]) : false;
+}
+if(isIE() && isIE() <= 8){
+  // currently blocking map layers on IE8
+  alert("We are working to support Internet Explorer 8. Please upgrade Internet Explorer or use another browser.");
 }
