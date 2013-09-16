@@ -14,7 +14,7 @@ var map = L.map('map', {
 map.attributionControl.setPrefix('<a href="#" onclick="credits();">About</a>');
 map.addControl(L.control.zoom({ position: 'topright' }));
 
-var basemap = L.esri.basemapLayer("Topographic").addTo(map);
+var basemap = L.tileLayer("http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}").addTo(map);
 
 var zoomedOut = false;
 var semitransparent = false;
