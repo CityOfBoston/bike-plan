@@ -183,3 +183,6 @@ button:active {
 a{
   text-decoration: none;
 }
+a img{
+  border: none;
+}
