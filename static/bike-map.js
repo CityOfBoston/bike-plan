@@ -481,7 +481,7 @@ $("#seeplanned30").click(function(e){
 });
 
 // imagery layer
-var imagery = L.esri.basemapLayer("Imagery");
+var imagery = L.tileLayer("http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}");
 function toggleImagery(){
   if(map.hasLayer(imagery)){
     map.addLayer(basemap);
