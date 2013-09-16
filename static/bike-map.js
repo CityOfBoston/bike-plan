@@ -295,6 +295,10 @@ function describeLayer(geojson, layer, buildDate){
 
 // time slider on overlay
 L.DomEvent.disableClickPropagation( $(".overlay-left")[0] );
+var phases = ["static/tricycle.png", "static/trainingwheels.png", "static/regbike.png"];
+preload(phases);
+preload(["static/CargoBike.png"]);
+preload(["static/Trail-a-Bike.png"]);
 
 $("#yearslider").slider({
   min: minyear,
@@ -664,4 +668,14 @@ function isIE(){
 if(isIE() && isIE() <= 8){
   // currently blocking map layers on IE8
   alert("We are working to support Internet Explorer 8. Please upgrade Internet Explorer or use another browser.");
+}
+
+function preload(srcs){
+  var images = [ ];
+  for(var i=0; i<srcs.length; i++){
+    images[i] = new Image();
+    images[i].src = srcs[i];
+    images[i].style.display = "none";
+    $(document.body).append(images[i]);
+  }
 }
