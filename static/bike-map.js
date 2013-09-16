@@ -161,9 +161,9 @@ var currentBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest
   }
 });
 setTimeout(function(){
-  if(!isIE() || isIE() > 8){
+  //if(!isIE() || isIE() > 8){
     currentBikes.addTo(map);
-  }
+  //}
 }, 250);
 
 function styleLayer(geojson, buildDate){
