@@ -430,22 +430,6 @@ var fiveBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/se
     layer.bindPopup( describeLayer(geojson, layer, "five") );
   }
 });
-setTimeout(function(){
-  if(!isIE() || isIE() > 8){
-    fiveBikes.addTo(map);
-    if(!showFive){
-      fiveBikes.removeLayer(map);
-    }
-  }
-}, 500);
-
-/*
-$("#seeplanned5").click(function(e){
-  $("#yearslider").slider({ value: fiveyear });
-  updateMapTime( currentyear );
-  updateMapTime( fiveyear );
-});
-*/
 
 var showThirty = false;
 
@@ -474,22 +458,6 @@ var thirtyBikes = L.esri.featureLayer("http://maps.cityofboston.gov/ArcGIS/rest/
     layer.bindPopup(describeLayer(geojson, layer, "thirty"));
   }
 });
-setTimeout(function(){
-  if(!isIE() || isIE() > 8){
-    thirtyBikes.addTo(map);
-    if(!showThirty){
-      map.removeLayer(thirtyBikes);
-    }
-  }
-}, 500);
-
-/*
-$("#seeplanned30").click(function(e){
-  $("#yearslider").slider({ value: maxyear });
-  updateMapTime( currentyear );
-  updateMapTime( maxyear );
-});
-*/
 
 // imagery layer
 var imagery = L.tileLayer("http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}");
@@ -657,8 +625,38 @@ function togglePrimary(){
   }
 }
 
+function checkForEnter(e){
+  if(e.keyCode == 13){
+    streetSearch();
+  }
+}
+function streetSearch(){
+  var street = $("#searchbox").val();
+  var s = document.createElement("script");
+  s.type = "text/javascript";
+  s.src = "http://maps.cityofboston.gov/ArcGIS/rest/services/BaseServices/Bike_network/FeatureServer/2/query?where=STREET_NAM+LIKE+'%" + street + "%'&returnGeometry=true&outSR=4326&f=pjson&callback=streetCallback";
+  $(document.body).append(s);
+}
+function streetCallback(data){
+  var north = -90;
+  var south = 90;
+  var east = -180;
+  var west = 180;
+  for(var f=0;f<data.features.length;f++){
+    for(var c=0;c<data.features[f].geometry.paths[0].length;c++){
+      north = Math.max(north, data.features[f].geometry.paths[0][c][1] );
+      south = Math.min(south, data.features[f].geometry.paths[0][c][1] );
+      east = Math.max(east, data.features[f].geometry.paths[0][c][0] );
+      west = Math.min(west, data.features[f].geometry.paths[0][c][0] );
+    }
+  }
+  if(north > south){
+    map.fitBounds([[south, west], [north, east]]);
+  }
+}
+
 function credits(){
-  alert("Map by City of Boston; Training Wheels by Ribbla Team, from The Noun Project; Future Bike by Simon Child, from The Noun Project; Tandem Bike by James Evans, from the Noun Project");
+  alert("Map by City of Boston; Training Wheels by Ribbla Team, from The Noun Project; Trail-a-Bike and Cargo Bike from Boston Bikes");
 }
 
 function isIE(){

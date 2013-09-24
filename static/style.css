@@ -38,7 +38,7 @@ html, body, #map{
 }
 .layer{
   text-align: left;
-  margin: 10px 0px;
+  margin: 8px 0px;
   cursor: pointer;
   padding: 2px 0px;
   font-size: 8pt;
@@ -185,4 +185,14 @@ a{
 }
 a img{
   border: none;
+}
+.lower h4{
+  margin-bottom: 0;
+}
+.searchbox{
+  display: inline;
+  width: 100px;
+}
+.searchbtn{
+  display: inline;
 }
