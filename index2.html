@@ -8,7 +8,7 @@
       <link rel="stylesheet" href="static/leaflet.ie.css" />
     <![endif]-->
     <link rel="stylesheet" type="text/css" href="static/slider.css"/>
-    <link rel="stylesheet" type="text/css" href="static/style.css"/>
+    <link rel="stylesheet" type="text/css" href="static/style2.css"/>
   </head>
   <body>
     <div id="map">
@@ -56,6 +56,10 @@
           <div class="layer-symbol">_</div>
           <span class="layer-label">Primary and Secondary Routes</span>
         </div>
+        <input id="searchbox" class="searchbox" type="text" placeholder="Find Street" onkeydown="checkForEnter(event)"/>
+        <input class="searchbtn" type="button" value="Search" onclick="streetSearch()"/>
+        <br/>
+        <br/>
         <!--
         <div class="layer">
           <div class="layer-symbol">_</div>
@@ -83,6 +87,7 @@
         </a>
       </div>
     </div>
+
     <script type="text/javascript" src="static/leaflet.js"></script>
 
     <script type="text/javascript" src="static/jquery-1.9.1.js"></script>
@@ -94,6 +99,7 @@
     
     <script type="text/javascript" src="static/esri-leaflet.min.js?v=2"></script>
     <script type="text/javascript" src="static/bike-map.js?v=5"></script>
+
     <!--
     Icons CC-BY
     Tricycle: CC0
