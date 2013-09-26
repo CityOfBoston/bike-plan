@@ -195,13 +195,21 @@ var jurisdictions = {
 
 var currentBikes;
 if(isIE() && isIE() <= 8){
-  currentBikes = L.esri.dynamicMapLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/MapServer", {
+  var mapurl = "http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/MapServer";
+  if(getURLVar("external")){
+    mapurl = "http://maps.cityofboston.gov/ArcGIS/rest/services/BaseServices/Bike_network/MapServer";
+  }
+  currentBikes = L.esri.dynamicMapLayer(mapurl, {
     opacity: 1,
     layers: [0]
   });
 }
 else{
-  currentBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/0", {
+  var mapurl = "http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/0";
+  if(getURLVar("external")){
+    mapurl = "http://maps.cityofboston.gov/ArcGIS/rest/services/BaseServices/Bike_network/FeatureServer/0";
+  }
+  currentBikes = L.esri.featureLayer(mapurl, {
     style: function(geojson){
       return styleLayer(geojson, "current");
     },
@@ -522,13 +530,21 @@ var showFive = false;
 var fiveBikes;
 
 if(isIE() && isIE() <= 8){
-  fiveBikes = L.esri.dynamicMapLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/MapServer", {
+  var mapurl = "http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/MapServer";
+  if(getURLVar("external")){
+    mapurl = "http://maps.cityofboston.gov/ArcGIS/rest/services/BaseServices/Bike_network/MapServer";
+  }
+  fiveBikes = L.esri.dynamicMapLayer(mapurl, {
     opacity: 1,
     layers: [1]
   });
 }
 else{
-  fiveBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/1", {
+  var mapurl = "http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/1";
+  if(getURLVar("external")){
+    mapurl = "http://maps.cityofboston.gov/ArcGIS/rest/services/BaseServices/Bike_network/FeatureServer/1";
+  }
+  fiveBikes = L.esri.featureLayer(mapurl, {
     style: function(geojson){
       return styleLayer(geojson, "five");
     },
@@ -559,13 +575,21 @@ var showThirty = false;
 
 var thirtyBikes;
 if(isIE() && isIE() <= 8){
-  thirtyBikes = L.esri.dynamicMapLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/MapServer", {
+  var mapurl = "http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/MapServer";
+  if(getURLVar("external")){
+    mapurl = "http://maps.cityofboston.gov/ArcGIS/rest/services/BaseServices/Bike_network/MapServer";
+  }
+  thirtyBikes = L.esri.dynamicMapLayer(mapurl, {
     opacity: 1,
     layers: [2]
   });
 }
 else{
-  thirtyBikes = L.esri.featureLayer("http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/2", {
+  var mapurl = "http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/2";
+  if(getURLVar("external")){
+    mapurl = "http://maps.cityofboston.gov/ArcGIS/rest/services/BaseServices/Bike_network/FeatureServer/2";
+  }
+  thirtyBikes = L.esri.featureLayer(mapurl, {
     style: function(geojson){
       return styleLayer(geojson, "thirty");
     },
@@ -823,3 +847,5 @@ function preload(srcs){
     $(document.body).append(images[i]);
   }
 }
+
+function getURLVar(nm){nm=nm.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");var rxS="[\\?&]"+nm+"=([^&#]*)";var rx=new RegExp(rxS);var rs=rx.exec(window.location.href.toLowerCase());if(!rs){return null;}else{return rs[1];}}
