@@ -767,7 +767,8 @@ function streetSearch(){
   var street = $("#searchbox").val();
   var s = document.createElement("script");
   s.type = "text/javascript";
-  s.src = "http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/2/query?where=STREET_NAM+LIKE+'%" + street + "%'&returnGeometry=true&outSR=4326&f=pjson&callback=streetCallback";
+  //s.src = "http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/2/query?where=STREET_NAM+LIKE+'%" + street + "%'&returnGeometry=true&outSR=4326&f=pjson&callback=streetCallback";
+  s.src = "http://nominatim.openstreetmap.org/search?q=" + encodeURIComponent( street ) + ",+boston,+ma&format=json&json_callback=streetCallback";
   $(document.body).append(s);
 }
 function streetCallback(data){
@@ -775,6 +776,7 @@ function streetCallback(data){
   var south = 90;
   var east = -180;
   var west = 180;
+  /*
   for(var f=0;f<data.features.length;f++){
     for(var c=0;c<data.features[f].geometry.paths[0].length;c++){
       north = Math.max(north, data.features[f].geometry.paths[0][c][1] );
@@ -782,6 +784,13 @@ function streetCallback(data){
       east = Math.max(east, data.features[f].geometry.paths[0][c][0] );
       west = Math.min(west, data.features[f].geometry.paths[0][c][0] );
     }
+  }
+  */
+  for(var p=0;p<data.length;p++){
+    north = Math.max(north, data[p].boundingbox[1] );
+    south = Math.min(south, data[p].boundingbox[0] );
+    east = Math.max(east, data[p].boundingbox[3] );
+    west = Math.min(west, data[p].boundingbox[2] );
   }
   if(north > south){
     map.fitBounds([[south, west], [north, east]]);
