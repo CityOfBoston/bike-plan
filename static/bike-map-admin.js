@@ -32,7 +32,7 @@ map.on('zoomend', function(){
           opacity = pathsByYears[year][i].layer.getLayers()[0].options.opacity;
         }
         if(opacity){
-          pathsByYears[year][i].layer.setStyle({ opacity: 0.4 });
+          pathsByYears[year][i].layer.setStyle({ opacity: 0.6 });
         }
       }
     }
@@ -235,7 +235,7 @@ function styleLayer(geojson, buildDate){
 
   var opacity = 0.8;
   if(semitransparent){
-    opacity = 0.4;
+    opacity = 0.6;
   }
   
   if(geojson.properties.Network && !isNaN(geojson.properties.Network * 1) && geojson.properties.Network * 1 == 2){
@@ -740,7 +740,7 @@ function togglePrimary(){
       else{
         var opacity = 0.8;
         if(semitransparent){
-          opacity = 0.4;
+          opacity = 0.6;
         }
         if(!pathsByYears[year][i].opacity){
           opacity = 0;
