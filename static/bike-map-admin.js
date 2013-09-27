@@ -787,37 +787,53 @@ function checkForEnter(e){
     streetSearch();
   }
 }
+var makeStreetSearch = null;
 function streetSearch(){
-  var street = $("#searchbox").val();
+  makeStreetSearch = $("#searchbox").val();
   var s = document.createElement("script");
   s.type = "text/javascript";
   //s.src = "http://zdgis01/ArcGIS/rest/services/dev_services/Bike_network_dev/FeatureServer/2/query?where=STREET_NAM+LIKE+'%" + street + "%'&returnGeometry=true&outSR=4326&f=pjson&callback=streetCallback";
-  s.src = "http://nominatim.openstreetmap.org/search?q=" + encodeURIComponent( street ) + ",+boston,+ma&format=json&json_callback=streetCallback";
+  s.src = "http://nominatim.openstreetmap.org/search?q=" + encodeURIComponent( makeStreetSearch ) + ",+boston,+ma,+usa&format=json&json_callback=streetCallback";
   $(document.body).append(s);
 }
+var bostonbbox = [ [42.161368,-71.273804], [42.557127,-70.694275] ];
 function streetCallback(data){
   var north = -90;
   var south = 90;
   var east = -180;
   var west = 180;
-  /*
-  for(var f=0;f<data.features.length;f++){
-    for(var c=0;c<data.features[f].geometry.paths[0].length;c++){
-      north = Math.max(north, data.features[f].geometry.paths[0][c][1] );
-      south = Math.min(south, data.features[f].geometry.paths[0][c][1] );
-      east = Math.max(east, data.features[f].geometry.paths[0][c][0] );
-      west = Math.min(west, data.features[f].geometry.paths[0][c][0] );
-    }
-  }
-  */
   for(var p=0;p<data.length;p++){
-    north = Math.max(north, data[p].boundingbox[1] );
-    south = Math.min(south, data[p].boundingbox[0] );
-    east = Math.max(east, data[p].boundingbox[3] );
-    west = Math.min(west, data[p].boundingbox[2] );
+    var local_n = data[p].boundingbox[1];
+    var local_s = data[p].boundingbox[0];
+    var local_e = data[p].boundingbox[3];
+    var local_w = data[p].boundingbox[2];
+    if(local_n > bostonbbox[1][0] || local_s < bostonbbox[0][0] || local_e > bostonbbox[1][1] || local_w < bostonbbox[0][1]){
+      // outside of boston - disregard
+      continue;
+    }    
+    north = Math.max(north, local_n );
+    south = Math.min(south, local_s );
+    east = Math.max(east, local_e );
+    west = Math.min(west, local_w );
   }
   if(north > south){
     map.fitBounds([[south, west], [north, east]]);
+  }
+  else{
+    // found no results in Boston
+    if(makeStreetSearch){
+      if(makeStreetSearch.toLowerCase().indexOf(" st") == -1){
+        makeStreetSearch += " St";
+      }
+      else{
+        makeStreetSearch = makeStreetSearch.toLowerCase().replace(" st", " ave");
+      }
+      var s = document.createElement("script");
+      s.type = "text/javascript";
+      s.src = "http://nominatim.openstreetmap.org/search?q=" + encodeURIComponent( makeStreetSearch ) + ",+boston,+ma,+usa&format=json&json_callback=streetCallback";
+      $(document.body).append(s);
+      makeStreetSearch = null;
+    }
   }
 }
 
